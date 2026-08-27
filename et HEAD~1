@@ -1,0 +1,35 @@
+[33mcommit 22467769fffda007c8b72190a9184791d93e1887[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: darrylmac <darrylmacarandan01@gmail.com>
+Date:   Thu Aug 27 21:38:38 2026 +0800
+
+    Add borrowing demonstration
+
+[33mcommit 16744bc4bafe8cc596fb9b12df69cba763b558b3[m
+Author: darrylmac <darrylmacarandan01@gmail.com>
+Date:   Thu Aug 27 21:35:30 2026 +0800
+
+    Implement borrowing service
+
+[33mcommit 40460ae1dac0bfc2c41220468b2562bf899eb29a[m
+Author: darrylmac <darrylmacarandan01@gmail.com>
+Date:   Thu Aug 27 21:19:57 2026 +0800
+
+    added constructor to the borrowings
+
+[33mcommit af7b868cd304fa884329703d9658ff49194aa5fa[m
+Author: darrylmac <darrylmacarandan01@gmail.com>
+Date:   Thu Aug 27 21:17:26 2026 +0800
+
+    added repository abstractions
+
+[33mcommit d8eee986b382b2d8b0ea588a2a3bc67cad5a7f0a[m
+Author: darrylmac <darrylmacarandan01@gmail.com>
+Date:   Thu Aug 27 15:19:09 2026 +0800
+
+    add domain models
+
+[33mcommit e59ce9501c62523249edeb7da2a217102e62c860[m
+Author: darrylmac <darrylmacarandan01@gmail.com>
+Date:   Thu Aug 27 14:57:46 2026 +0800
+
+    initial solution structure
