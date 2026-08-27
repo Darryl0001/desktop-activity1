@@ -4,6 +4,12 @@ This repository contains a C#/.NET implementation of a Campus Equipment Borrowin
 
 ---
 
+
+### Members
+- Brent Marcus Ocaya
+- Darryl Macarandan
+
+
 ## Part A: Requirements & System Analysis
 
 ### 1. Actors
@@ -94,3 +100,4 @@ EquipmentBorrowing.               EquipmentBorrowing.
                          ▼
                EquipmentBorrowing.
                      Domain
+
