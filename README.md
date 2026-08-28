@@ -84,26 +84,8 @@ This repository contains a C#/.NET implementation of a Campus Equipment Borrowin
 
 ---
 
-### 2. Dependency Direction
 
-Dependencies point strictly inward toward the core Domain layer:
-
-```text
-       EquipmentBorrowing.ConsoleApp / Tests
-                         │
-        ┌────────────────┴────────────────┐
-        ▼                                 ▼
-EquipmentBorrowing.               EquipmentBorrowing.
-  Infrastructure                    Application
-        │                                 │
-        └────────────────┬────────────────┘
-                         ▼
-               EquipmentBorrowing.
-                     Domain
-
-```
-
-### 3. Architecture Reflection
+### 2. Architecture Reflection
 Question 1: How does Clean Architecture enforce the Dependency Inversion Principle here?
 - High-level policy classes like BorrowEquipmentService inside the Application layer do not depend on low-level data access implementations. Instead, they depend on interface abstractions (IStudentRepository, IEquipmentRepository, IBorrowingRepository) defined in the Application layer itself. The concrete implementations reside in the Infrastructure layer and are injected at runtime.
 
