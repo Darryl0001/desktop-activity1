@@ -101,7 +101,7 @@ EquipmentBorrowing.               EquipmentBorrowing.
                EquipmentBorrowing.
                      Domain
 
-
+```
 
 ### 3. Architecture Reflection
 Question 1: How does Clean Architecture enforce the Dependency Inversion Principle here?
