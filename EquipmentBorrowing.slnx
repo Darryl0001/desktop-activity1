@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="EquipmentBorrowing.Desktop/EquipmentBorrowing.Desktop.csproj" Id="aa3e698d-4e93-438d-9596-d2f0835553d9" />
     <Project Path="src/EquipmentBorrowing.Application/EquipmentBorrowing.Application.csproj" />
     <Project Path="src/EquipmentBorrowing.ConsoleApp/EquipmentBorrowing.ConsoleApp.csproj" />
     <Project Path="src/EquipmentBorrowing.Domain/EquipmentBorrowing.Domain.csproj" />

@@ -27,4 +27,8 @@ public class InMemoryEquipmentRepository : IEquipmentRepository
         }
         return Task.CompletedTask;
     }
+    public Task<IReadOnlyList<Equipment>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult<IReadOnlyList<Equipment>>(_equipments.ToList());
+    }
 }
