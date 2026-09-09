@@ -23,9 +23,10 @@ public partial class App : Avalonia.Application
             var borrowingRepository = new InMemoryBorrowingRepository();
 
             var borrowEquipmentService = new BorrowEquipmentService(studentRepository, equipmentRepository, borrowingRepository);
+            var returnEquipmentService = new ReturnEquipmentService(borrowingRepository, equipmentRepository, studentRepository);
 
             var equipmentViewModel = new EquipmentViewModel(equipmentRepository, borrowEquipmentService);
-            var borrowingsViewModel = new BorrowingsViewModel();
+            var borrowingsViewModel = new BorrowingsViewModel(borrowingRepository, returnEquipmentService);
             var mainWindowViewModel = new MainWindowViewModel(equipmentViewModel, borrowingsViewModel);
 
             desktop.MainWindow = new MainWindow { DataContext = mainWindowViewModel };

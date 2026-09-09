@@ -22,6 +22,7 @@ public class BorrowEquipmentService
     public async Task<BorrowResult> ExecuteAsync(
         int studentId,
         int equipmentId,
+        DateTime? expectedReturnDate = null,
         CancellationToken cancellationToken = default)
     {
         var student = await _studentRepository.GetByIdAsync(studentId, cancellationToken);
@@ -53,6 +54,11 @@ public class BorrowEquipmentService
 
         int nextBorrowingId = await _borrowingRepository.GetNextIdAsync(cancellationToken);
         var borrowing = new Borrowing(nextBorrowingId, student.Id, equipment.Id);
+
+        if (expectedReturnDate.HasValue)
+        {
+            borrowing.ExpectedReturnDate = expectedReturnDate.Value;
+        }
 
         // Update states
         equipment.IsAvailable = false;

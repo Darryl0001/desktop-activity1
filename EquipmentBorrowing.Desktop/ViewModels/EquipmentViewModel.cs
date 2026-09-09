@@ -1,12 +1,13 @@
 ﻿namespace EquipmentBorrowing.Desktop.ViewModels;
 
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EquipmentBorrowing.Application.Interfaces;
 using EquipmentBorrowing.Application.Services;
 using EquipmentBorrowing.Domain;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 
 public partial class EquipmentViewModel : ObservableObject
 {
@@ -21,6 +22,9 @@ public partial class EquipmentViewModel : ObservableObject
 
     [ObservableProperty]
     private string studentIdInput = string.Empty;
+
+    [ObservableProperty]
+    private DateTimeOffset? selectedReturnDate = DateTimeOffset.Now.AddDays(7);
 
     public ObservableCollection<Equipment> Equipment { get; } = new();
 
@@ -59,8 +63,17 @@ public partial class EquipmentViewModel : ObservableObject
             return;
         }
 
+        if (SelectedReturnDate is null || SelectedReturnDate.Value.Date < DateTime.Today)
+        {
+            StatusMessage = "Please choose a valid expected return date (today or later).";
+            return;
+        }
+
         // --- Business logic lives entirely in the service, not here ---
-        var result = await _borrowEquipmentService.ExecuteAsync(studentId, SelectedEquipment.Id);
+        var result = await _borrowEquipmentService.ExecuteAsync(
+            studentId,
+            SelectedEquipment.Id,
+            SelectedReturnDate.Value.DateTime);
 
         if (result.IsSuccess)
         {

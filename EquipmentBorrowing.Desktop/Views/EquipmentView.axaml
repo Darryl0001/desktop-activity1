@@ -9,6 +9,8 @@
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" Margin="0,10,0,0">
             <TextBlock Text="Student ID:" VerticalAlignment="Center"/>
             <TextBox Text="{Binding StudentIdInput}" Width="80"/>
+            <TextBlock Text="Return by:" VerticalAlignment="Center"/>
+            <DatePicker SelectedDate="{Binding SelectedReturnDate}"/>
             <Button Content="Borrow Equipment" Command="{Binding BorrowCommand}"/>
         </StackPanel>
 
@@ -25,4 +27,4 @@
             </ListBox.ItemTemplate>
         </ListBox>
     </DockPanel>
-</UserControl>  
+</UserControl>

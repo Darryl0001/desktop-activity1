@@ -19,8 +19,16 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowEquipment() => CurrentPage = EquipmentViewModel;
+    private void ShowEquipment()
+    {
+        CurrentPage = EquipmentViewModel;
+        _ = EquipmentViewModel.LoadEquipmentCommand.ExecuteAsync(null);
+    }
 
     [RelayCommand]
-    private void ShowBorrowings() => CurrentPage = BorrowingsViewModel;
+    private void ShowBorrowings()
+    {
+        CurrentPage = BorrowingsViewModel;
+        _ = BorrowingsViewModel.LoadActiveBorrowingsCommand.ExecuteAsync(null);
+    }
 }
