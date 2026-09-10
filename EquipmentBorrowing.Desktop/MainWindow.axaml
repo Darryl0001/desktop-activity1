@@ -17,7 +17,7 @@
     </Window.DataTemplates>
 
     <Grid ColumnDefinitions="180,*">
-        <StackPanel Grid.Column="0" Margin="10" Spacing="8" Background="#F0F0F0">
+        <StackPanel Grid.Column="0" Margin="10" Spacing="8" Background="#3d3d3d">
             <TextBlock Text="Campus Equipment" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
             <Button Content="Equipment" Command="{Binding ShowEquipmentCommand}" HorizontalAlignment="Stretch"/>
             <Button Content="Active Borrowings" Command="{Binding ShowBorrowingsCommand}" HorizontalAlignment="Stretch"/>
