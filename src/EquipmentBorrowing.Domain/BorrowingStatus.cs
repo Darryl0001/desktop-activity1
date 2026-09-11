@@ -1,8 +1,7 @@
 namespace EquipmentBorrowing.Domain;
 
-
 public enum BorrowingStatus
 {
-    Active, 
-    Inavtive
+    Active,
+    Returned
 }
