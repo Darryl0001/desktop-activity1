@@ -77,8 +77,8 @@ public partial class EquipmentViewModel : ObservableObject
 
         if (result.IsSuccess)
         {
+            await LoadEquipmentAsync(); // refresh first
             StatusMessage = $"Borrowed! Borrowing #{result.Borrowing!.Id}, due {result.Borrowing.ExpectedReturnDate:d}.";
-            await LoadEquipmentAsync(); // refresh so availability reflects the change
         }
         else
         {

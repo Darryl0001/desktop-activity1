@@ -53,8 +53,8 @@ public partial class BorrowingsViewModel : ObservableObject
 
         if (result.IsSuccess)
         {
-            StatusMessage = $"Returned borrowing #{result.Borrowing!.Id}.";
-            await LoadActiveBorrowingsAsync();
+            await LoadActiveBorrowingsAsync(); // refresh first
+            StatusMessage = $"Returned borrowing #{result.Borrowing!.Id}."; 
         }
         else
         {
