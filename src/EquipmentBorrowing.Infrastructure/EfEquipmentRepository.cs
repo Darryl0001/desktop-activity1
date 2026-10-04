@@ -42,4 +42,15 @@ public class EfEquipmentRepository : IEquipmentRepository
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+
+    public async Task<IReadOnlyList<Equipment>> GetAvailableAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Equipment
+            .AsNoTracking()
+            .Where(e => e.IsAvailable)
+            .OrderBy(e => e.Name)
+            .ToListAsync(cancellationToken);
+    }
 }

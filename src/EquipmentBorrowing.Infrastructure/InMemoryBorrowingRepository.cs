@@ -1,5 +1,6 @@
 namespace EquipmentBorrowing.Infrastructure.Repositories;
 
+using EquipmentBorrowing.Application;
 using EquipmentBorrowing.Application.Interfaces;
 using EquipmentBorrowing.Domain;
 
@@ -38,5 +39,27 @@ public class InMemoryBorrowingRepository : IBorrowingRepository
             _borrowings[existingIndex] = borrowing;
         }
         return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<ActiveBorrowingDetails>> GetActiveBorrowingsWithDetailsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException(
+            "This relational query is only supported by the EF Core repository.");
+    }
+
+    public Task<IReadOnlyList<Borrowing>> GetOverdueBorrowingsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+
+        var overdue = _borrowings
+            .Where(b =>
+                b.Status == BorrowingStatus.Active &&
+                b.ExpectedReturnDate < now)
+            .OrderBy(b => b.ExpectedReturnDate)
+            .ToList();
+
+        return Task.FromResult<IReadOnlyList<Borrowing>>(overdue);
     }
 }

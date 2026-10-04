@@ -1,3 +1,4 @@
+using EquipmentBorrowing.Application;
 using EquipmentBorrowing.Application.Interfaces;
 using EquipmentBorrowing.Domain;
 using EquipmentBorrowing.Infrastructure.Persistence;
@@ -65,4 +66,42 @@ public class EfBorrowingRepository : IBorrowingRepository
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<ActiveBorrowingDetails>> GetActiveBorrowingsWithDetailsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await (
+            from borrowing in _dbContext.Borrowings.AsNoTracking()
+            join student in _dbContext.Students
+                on borrowing.StudentId equals student.Id
+            join equipment in _dbContext.Equipment
+                on borrowing.EquipmentId equals equipment.Id
+            where borrowing.Status == BorrowingStatus.Active
+            orderby borrowing.BorrowedDate descending
+            select new ActiveBorrowingDetails(
+                borrowing.Id,
+                student.Name,
+                equipment.Name,
+                borrowing.BorrowedDate,
+                borrowing.ExpectedReturnDate)
+        ).ToListAsync(cancellationToken);
+    }
+
+
+    public async Task<IReadOnlyList<Borrowing>> GetOverdueBorrowingsAsync(
+    CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+
+        return await _dbContext.Borrowings
+            .AsNoTracking()
+            .Where(b =>
+                b.Status == BorrowingStatus.Active &&
+                b.ExpectedReturnDate < now)
+            .OrderBy(b => b.ExpectedReturnDate)
+            .ToListAsync(cancellationToken);
+    }
+
+    
 }
+
