@@ -22,5 +22,33 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
 
         builder.Property(s => s.MaxAllowedBorrowings)
             .IsRequired();
+
+
+        builder.HasData(
+            new Student
+            {
+                Id = 1,
+                Name = "Juan Dela Cruz",
+                IsAllowedToBorrow = true,
+                ActiveBorrowingsCount = 0,
+                MaxAllowedBorrowings = 3
+            },
+            new Student
+            {
+                Id = 2,
+                Name = "Maria Santos",
+                IsAllowedToBorrow = false,
+                ActiveBorrowingsCount = 0,
+                MaxAllowedBorrowings = 3
+            },
+            new Student
+            {
+                Id = 3,
+                Name = "Pedro Reyes",
+                IsAllowedToBorrow = true,
+                ActiveBorrowingsCount = 3,
+                MaxAllowedBorrowings = 3
+            }
+        );
     }
 }

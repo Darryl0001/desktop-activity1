@@ -18,5 +18,32 @@ public class EquipmentConfiguration : IEntityTypeConfiguration<Equipment>
             .IsRequired();
 
         builder.HasIndex(e => e.Name);
+
+        builder.HasData(
+            new Equipment
+            {
+                Id = 1,
+                Name = "Laptop",
+                IsAvailable = true
+            },
+            new Equipment
+            {
+                Id = 2,
+                Name = "Projector",
+                IsAvailable = true
+            },
+            new Equipment
+            {
+                Id = 3,
+                Name = "Camera",
+                IsAvailable = false
+            },
+            new Equipment
+            {
+                Id = 4,
+                Name = "Microphone",
+                IsAvailable = true
+            }
+        );
     }
 }
