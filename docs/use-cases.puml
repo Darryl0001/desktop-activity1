@@ -1,0 +1,34 @@
+@startuml
+left to right direction
+actor "Laboratory Staff / Equipment Custodian" as Custodian
+rectangle "Campus Equipment Borrowing System" {
+  usecase "UC-01 View Equipment Catalog" as UC01
+  usecase "UC-02 Find Available Equipment" as UC02
+  usecase "UC-03 Borrow Equipment" as UC03
+  usecase "UC-04 View Active Borrowings" as UC04
+  usecase "UC-05 Return Equipment" as UC05
+  usecase "UC-06 Check Out Multiple Equipment Items" as UC06
+  usecase "UC-07 View Student Borrowing History" as UC07
+  usecase "UC-08 View Equipment Borrowing History" as UC08
+  usecase "UC-09 Search, Filter, and Sort Borrowings" as UC09
+  usecase "UC-12 Register Student" as UC12
+  usecase "UC-13 Update Student Information" as UC13
+  usecase "UC-14 Change Student Borrowing Eligibility" as UC14
+  usecase "UC-15 Register Equipment" as UC15
+  usecase "UC-16 Update Equipment Information" as UC16
+}
+Custodian -- UC01
+Custodian -- UC02
+Custodian -- UC03
+Custodian -- UC04
+Custodian -- UC05
+Custodian -- UC06
+Custodian -- UC07
+Custodian -- UC08
+Custodian -- UC09
+Custodian -- UC12
+Custodian -- UC13
+Custodian -- UC14
+Custodian -- UC15
+Custodian -- UC16
+@enduml

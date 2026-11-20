@@ -8,6 +8,7 @@ public class Borrowing
     public DateTime BorrowedDate { get; set; }
     public DateTime ExpectedReturnDate { get; set; }
     public BorrowingStatus Status { get; set; }
+    public DateTime? ActualReturnDate { get; set; }
 
     public Borrowing() { }
 
@@ -16,7 +17,7 @@ public class Borrowing
         Id = id;
         StudentId = studentId;
         EquipmentId = equipmentId;
-        BorrowedDate = DateTime.UtcNow;
+        BorrowedDate = DateTime.Today;
         ExpectedReturnDate = BorrowedDate.AddDays(durationDays);
         Status = BorrowingStatus.Active;
     }

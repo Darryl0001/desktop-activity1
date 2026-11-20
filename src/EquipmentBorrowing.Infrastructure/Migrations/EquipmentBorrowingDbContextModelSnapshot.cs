@@ -4,6 +4,7 @@ using EquipmentBorrowing.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,84 +16,97 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("EquipmentBorrowing.Domain.Borrowing", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ActualReturnDate")
+                        .HasColumnType("date");
 
                     b.Property<DateTime>("BorrowedDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("date");
 
                     b.Property<int>("EquipmentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("ExpectedReturnDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("date");
 
                     b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("StudentId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EquipmentId");
+                    b.HasIndex("EquipmentId")
+                        .IsUnique()
+                        .HasFilter("\"Status\" = 0");
 
-                    b.HasIndex("Status");
+                    b.HasIndex("StudentId", "Status");
 
-                    b.HasIndex("StudentId");
+                    b.ToTable("Borrowings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Borrowing_Due", "\"ExpectedReturnDate\" > \"BorrowedDate\"");
 
-                    b.ToTable("Borrowings");
+                            t.HasCheckConstraint("CK_Borrowing_Return", "(\"Status\" = 0 AND \"ActualReturnDate\" IS NULL) OR (\"Status\" = 1 AND \"ActualReturnDate\" IS NOT NULL AND \"ActualReturnDate\" >= \"BorrowedDate\")");
+                        });
                 });
 
             modelBuilder.Entity("EquipmentBorrowing.Domain.Equipment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsAvailable")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedIdentifier")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("text")
+                        .HasComputedColumnSql("upper(btrim(\"Identifier\", chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(32) || chr(133) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288)))", true);
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("NormalizedIdentifier")
+                        .IsUnique();
 
-                    b.ToTable("Equipment");
+                    b.ToTable("Equipment", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Equipment_Description", "\"Description\" IS NULL OR length(btrim(\"Description\", chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(32) || chr(133) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288))) > 0");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            IsAvailable = true,
-                            Name = "Laptop"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            IsAvailable = true,
-                            Name = "Projector"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            IsAvailable = false,
-                            Name = "Camera"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            IsAvailable = true,
-                            Name = "Microphone"
+                            t.HasCheckConstraint("CK_Equipment_Required", "length(btrim(\"Name\", chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(32) || chr(133) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288))) > 0 AND length(btrim(\"Identifier\", chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(32) || chr(133) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288))) > 0");
                         });
                 });
 
@@ -100,50 +114,45 @@ namespace EquipmentBorrowing.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
-                    b.Property<int>("ActiveBorrowingsCount")
-                        .HasColumnType("INTEGER");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Contact")
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsAllowedToBorrow")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MaxAllowedBorrowings")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedNumber")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("text")
+                        .HasComputedColumnSql("upper(btrim(\"StudentNumber\", chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(32) || chr(133) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288)))", true);
+
+                    b.Property<string>("StudentNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Students");
+                    b.HasIndex("NormalizedNumber")
+                        .IsUnique();
 
-                    b.HasData(
-                        new
+                    b.ToTable("Students", null, t =>
                         {
-                            Id = 1,
-                            ActiveBorrowingsCount = 0,
-                            IsAllowedToBorrow = true,
-                            MaxAllowedBorrowings = 3,
-                            Name = "Juan Dela Cruz"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ActiveBorrowingsCount = 0,
-                            IsAllowedToBorrow = false,
-                            MaxAllowedBorrowings = 3,
-                            Name = "Maria Santos"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ActiveBorrowingsCount = 3,
-                            IsAllowedToBorrow = true,
-                            MaxAllowedBorrowings = 3,
-                            Name = "Pedro Reyes"
+                            t.HasCheckConstraint("CK_Student_Contact", "\"Contact\" IS NULL OR length(btrim(\"Contact\", chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(32) || chr(133) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288))) > 0");
+
+                            t.HasCheckConstraint("CK_Student_Required", "length(btrim(\"Name\", chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(32) || chr(133) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288))) > 0 AND length(btrim(\"StudentNumber\", chr(9) || chr(10) || chr(11) || chr(12) || chr(13) || chr(32) || chr(133) || chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288))) > 0");
                         });
                 });
 

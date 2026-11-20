@@ -486,3 +486,10 @@ $RECYCLE.BIN/
 
 
 git diff -- cmd.txt
+
+# Local PostgreSQL verification cluster, secrets, and test artifacts
+.local/
+.env
+.env.*
+*.local.json
+TestResults/

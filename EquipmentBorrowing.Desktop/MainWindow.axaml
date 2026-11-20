@@ -1,27 +1,286 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:EquipmentBorrowing.Desktop.ViewModels"
-        xmlns:views="using:EquipmentBorrowing.Desktop.Views"
-        x:Class="EquipmentBorrowing.Desktop.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Title="Campus Equipment Borrowing System"
-        Width="900" Height="600">
-
-    <Window.DataTemplates>
-        <DataTemplate DataType="vm:EquipmentViewModel">
-            <views:EquipmentView/>
-        </DataTemplate>
-        <DataTemplate DataType="vm:BorrowingsViewModel">
-            <views:BorrowingsView/>
-        </DataTemplate>
-    </Window.DataTemplates>
-
-    <Grid ColumnDefinitions="180,*">
-        <StackPanel Grid.Column="0" Margin="10" Spacing="8" Background="#3d3d3d">
-            <TextBlock Text="Campus Equipment" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
-            <Button Content="Equipment" Command="{Binding ShowEquipmentCommand}" HorizontalAlignment="Stretch"/>
-            <Button Content="Active Borrowings" Command="{Binding ShowBorrowingsCommand}" HorizontalAlignment="Stretch"/>
+        xmlns:domain="using:EquipmentBorrowing.Domain"
+        xmlns:app="using:EquipmentBorrowing.Application"
+        x:Class="EquipmentBorrowing.Desktop.MainWindow" x:DataType="vm:WorkbenchViewModel"
+        Title="Campus Equipment" RequestedThemeVariant="Light"
+        Background="#F1F6F5" Foreground="#142F31"
+        Width="1180" Height="820" MinWidth="900" MinHeight="650">
+  <Window.Resources>
+    <Color x:Key="SystemAccentColor">#00736B</Color>
+    <DataTemplate x:Key="StudentTemplate" x:DataType="domain:Student">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="4,6">
+        <StackPanel Spacing="2">
+          <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+          <TextBlock Classes="muted" Text="{Binding StudentNumber}"/>
         </StackPanel>
-        <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" Margin="10"/>
-    </Grid>
+        <Border Grid.Column="1" Classes="badge" VerticalAlignment="Center">
+          <Panel>
+            <TextBlock Text="Eligible" IsVisible="{Binding IsAllowedToBorrow}"/>
+            <TextBlock Text="Restricted" Foreground="#865011" IsVisible="{Binding !IsAllowedToBorrow}"/>
+          </Panel>
+        </Border>
+      </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="LoanTemplate" x:DataType="app:LoanDetails">
+      <Border BorderBrush="#DEE9E6" BorderThickness="0,0,0,1" Padding="10,9">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+          <StackPanel Spacing="3">
+            <TextBlock Text="{Binding EquipmentName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+            <WrapPanel>
+              <TextBlock Classes="muted" Text="{Binding StudentName}" Margin="0,0,8,0"/>
+              <TextBlock Classes="muted" Text="{Binding StudentNumber}"/>
+            </WrapPanel>
+            <WrapPanel>
+              <TextBlock Classes="muted" Margin="0,0,12,0" Text="{Binding BorrowedDate, StringFormat='Out {0:MMM d, yyyy}'}"/>
+              <TextBlock Classes="muted" Margin="0,0,12,0" Text="{Binding ExpectedReturnDate, StringFormat='Due {0:MMM d, yyyy}'}"/>
+              <TextBlock Classes="muted" Text="{Binding ActualReturnDate, TargetNullValue='', StringFormat='Returned {0:MMM d, yyyy}'}"/>
+            </WrapPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Spacing="4" HorizontalAlignment="Right">
+            <Border Classes="badge" HorizontalAlignment="Right"><TextBlock Text="{Binding Status}"/></Border>
+            <TextBlock Classes="muted" Text="{Binding Id, StringFormat='Loan #{0}'}" HorizontalAlignment="Right"/>
+            <TextBlock Classes="muted" Text="{Binding Identifier}" HorizontalAlignment="Right"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </Window.Resources>
+  <Window.Styles>
+    <Style Selector="Border.card"><Setter Property="Background" Value="White"/><Setter Property="BorderBrush" Value="#D7E5E1"/><Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="14"/><Setter Property="Padding" Value="16"/></Style>
+    <Style Selector="Border.badge"><Setter Property="Background" Value="#E6F3EF"/><Setter Property="Padding" Value="8,3"/><Setter Property="CornerRadius" Value="12"/></Style>
+    <Style Selector="Border.badge TextBlock"><Setter Property="Foreground" Value="#006052"/><Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="Border.badge.unavailable"><Setter Property="Background" Value="#FFF0DC"/></Style>
+    <Style Selector="Border.badge.unavailable TextBlock"><Setter Property="Foreground" Value="#865011"/></Style>
+    <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="#4F6968"/><Setter Property="FontSize" Value="12"/></Style>
+    <Style Selector="TextBlock.section"><Setter Property="FontSize" Value="19"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="TextBlock.field"><Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+    <Style Selector="TextBlock.empty"><Setter Property="Foreground" Value="#4F6968"/><Setter Property="TextWrapping" Value="Wrap"/><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="Margin" Value="16"/></Style>
+    <Style Selector="Button"><Setter Property="MinHeight" Value="34"/><Setter Property="CornerRadius" Value="7"/><Setter Property="Padding" Value="12,6"/></Style>
+    <Style Selector="Button.primary"><Setter Property="Background" Value="#006D62"/><Setter Property="Foreground" Value="White"/></Style>
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="#00584F"/><Setter Property="Foreground" Value="White"/></Style>
+    <Style Selector="Button.primary:disabled /template/ ContentPresenter"><Setter Property="Background" Value="#E3EBE8"/><Setter Property="Foreground" Value="#617673"/></Style>
+    <Style Selector="Button.header-action"><Setter Property="Background" Value="#D9F2ED"/><Setter Property="Foreground" Value="#103E3C"/></Style>
+    <Style Selector="Button.header-action:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="White"/><Setter Property="Foreground" Value="#103E3C"/></Style>
+    <Style Selector="TextBox"><Setter Property="MinHeight" Value="34"/><Setter Property="CornerRadius" Value="7"/></Style>
+    <Style Selector="ListBox"><Setter Property="Background" Value="#F7FAF9"/><Setter Property="CornerRadius" Value="9"/></Style>
+    <Style Selector="ListBoxItem"><Setter Property="HorizontalContentAlignment" Value="Stretch"/></Style>
+    <Style Selector="TabItem"><Setter Property="FontSize" Value="15"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Padding" Value="12,8"/></Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,3,*,Auto">
+    <Border Background="#103E3C" Padding="24,15">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+        <StackPanel Spacing="3">
+          <TextBlock Text="Campus Equipment" FontSize="25" FontWeight="Bold" Foreground="White"/>
+          <TextBlock Text="Equipment borrowing and returns" Foreground="#C5E4DE" FontSize="12"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="header-action" Content="Reconnect / refresh" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsIdle}"/>
+          <Button Classes="header-action" Content="Records reviewed" Command="{Binding RecordsReviewedCommand}" IsVisible="{Binding NeedsReview}" IsEnabled="{Binding IsIdle}"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+    <ProgressBar Grid.Row="1" IsIndeterminate="True" Height="3" IsVisible="{Binding IsBusy}" Foreground="#00736B"/>
+    <TabControl Grid.Row="2" Margin="20,4,20,0" IsEnabled="{Binding IsIdle}">
+      <TabItem Header="Catalog &amp; checkout">
+        <Grid RowDefinitions="*,Auto" ColumnDefinitions="*,320" RowSpacing="10" ColumnSpacing="12" Margin="0,8">
+          <Border Classes="card">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="section" Text="Equipment catalog"/>
+                <TextBlock Grid.Column="1" Classes="muted" Text="{Binding CatalogState}" VerticalAlignment="Center"/>
+              </Grid>
+              <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                <TextBox PlaceholderText="Search name or equipment ID" Text="{Binding EquipmentSearch}">
+                  <TextBox.KeyBindings><KeyBinding Gesture="Enter" Command="{Binding FindEquipmentCommand}"/></TextBox.KeyBindings>
+                </TextBox>
+                <CheckBox Grid.Column="1" Content="Available only" IsChecked="{Binding AvailableOnly}"/>
+                <Button Grid.Column="2" Content="Find equipment" Command="{Binding FindEquipmentCommand}"/>
+              </Grid>
+              <Panel Grid.Row="2">
+                <ListBox ItemsSource="{Binding Equipment}" SelectedItem="{Binding SelectedEquipment}">
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:EquipmentRow">
+                      <Grid ColumnDefinitions="30,*,Auto" ColumnSpacing="8" Margin="2,5">
+                        <CheckBox IsChecked="{Binding IsChecked}" IsEnabled="{Binding Item.IsAvailable}" VerticalAlignment="Center"
+                                  AutomationProperties.Name="{Binding Item.Name, StringFormat='Include {0} in batch checkout'}"
+                                  ToolTip.Tip="Include in batch checkout"/>
+                        <StackPanel Grid.Column="1" Spacing="2">
+                          <TextBlock Text="{Binding Item.Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                          <TextBlock Classes="muted" Text="{Binding Item.Identifier}"/>
+                          <TextBlock Classes="muted" Text="{Binding Item.Description}" TextWrapping="Wrap" MaxLines="2"/>
+                        </StackPanel>
+                        <Border Grid.Column="2" Classes="badge" Classes.unavailable="{Binding !Item.IsAvailable}" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Availability}"/>
+                        </Border>
+                      </Grid>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Classes="empty" Text="No equipment to show. Try a different search or clear Available only." IsVisible="{Binding ShowEmptyCatalog}" IsHitTestVisible="False"/>
+              </Panel>
+            </Grid>
+          </Border>
+          <Border Grid.Column="1" Classes="card">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+              <StackPanel Spacing="9">
+                <TextBlock Classes="section" Text="{Binding EquipmentFormTitle}"/>
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="field" Text="Equipment identifier"/>
+                  <TextBox PlaceholderText="Equipment identifier (required)" Text="{Binding EquipmentIdentifier}" AutomationProperties.Name="Equipment identifier"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="field" Text="Equipment name"/>
+                  <TextBox PlaceholderText="Name (required)" Text="{Binding EquipmentName}" AutomationProperties.Name="Equipment name"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="field" Text="Description (optional)"/>
+                  <TextBox PlaceholderText="Type or notes" Text="{Binding EquipmentDescription}" AutomationProperties.Name="Equipment description"/>
+                </StackPanel>
+                <WrapPanel>
+                  <Button Classes="primary" Content="Save equipment" Command="{Binding SaveEquipmentCommand}" IsEnabled="{Binding CanWrite}" Margin="0,0,8,4"/>
+                  <Button Content="New equipment" Command="{Binding NewEquipmentCommand}" Margin="0,0,0,4"/>
+                </WrapPanel>
+                <Separator Margin="0,3"/>
+                <TextBlock Classes="field" Text="Equipment history"/>
+                <Button Content="Load selected equipment history" Command="{Binding EquipmentHistoryCommand}" IsEnabled="{Binding HasEquipment}"/>
+                <TextBlock Classes="muted" Text="{Binding EquipmentHistoryState}" TextWrapping="Wrap"/>
+                <ListBox MaxHeight="280" ItemsSource="{Binding EquipmentHistory}" ItemTemplate="{StaticResource LoanTemplate}"/>
+              </StackPanel>
+            </ScrollViewer>
+          </Border>
+          <Border Grid.Row="1" Grid.ColumnSpan="2" Classes="card" Background="#E6F3EF" Padding="14,10">
+            <StackPanel Spacing="6">
+              <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <TextBlock Classes="section" Text="Checkout"/>
+                <TextBlock Grid.Column="1" Classes="muted" Text="{Binding CheckoutSelection}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+              </Grid>
+              <WrapPanel>
+                <StackPanel Spacing="3" Margin="0,0,10,4">
+                  <TextBlock Classes="field" Text="Student"/>
+                  <ComboBox Width="202" MaxDropDownHeight="320" ItemsSource="{Binding CheckoutStudents}" SelectedItem="{Binding CheckoutStudent}" PlaceholderText="Select student" AutomationProperties.Name="Checkout student">
+                    <ComboBox.ItemTemplate><DataTemplate x:DataType="domain:Student">
+                      <StackPanel><TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/><TextBlock Classes="muted" Text="{Binding StudentNumber}"/></StackPanel>
+                    </DataTemplate></ComboBox.ItemTemplate>
+                  </ComboBox>
+                </StackPanel>
+                <StackPanel Spacing="3" Margin="0,0,10,4">
+                  <TextBlock Classes="field" Text="Expected return date"/>
+                  <CalendarDatePicker Width="150" SelectedDate="{Binding DueDate}" AutomationProperties.Name="Expected return date"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom" Margin="0,0,0,4">
+                  <Button Content="Borrow selected row" Command="{Binding BorrowOneCommand}" IsEnabled="{Binding CanBorrowOne}"/>
+                  <Button Classes="primary" Content="Check out checked items (2–3)" Command="{Binding CheckoutMultipleCommand}" IsEnabled="{Binding CanCheckoutMultiple}"/>
+                </StackPanel>
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </TabItem>
+      <TabItem Header="Students &amp; history">
+        <Grid ColumnDefinitions="*,1.25*" ColumnSpacing="12" Margin="0,8">
+          <Border Classes="card">
+            <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="section" Text="Students"/>
+                <TextBlock Grid.Column="1" Classes="muted" Text="{Binding StudentState}" VerticalAlignment="Center"/>
+              </Grid>
+              <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <TextBox PlaceholderText="Search name or student number" Text="{Binding StudentSearch}">
+                  <TextBox.KeyBindings><KeyBinding Gesture="Enter" Command="{Binding FindStudentsCommand}"/></TextBox.KeyBindings>
+                </TextBox>
+                <Button Grid.Column="1" Content="Find student" Command="{Binding FindStudentsCommand}"/>
+              </Grid>
+              <Panel Grid.Row="2">
+                <ListBox ItemsSource="{Binding Students}" SelectedItem="{Binding SelectedStudent}" ItemTemplate="{StaticResource StudentTemplate}"/>
+                <TextBlock Classes="empty" Text="No students to show. Try a different search or register a student." IsVisible="{Binding ShowEmptyStudents}" IsHitTestVisible="False"/>
+              </Panel>
+            </Grid>
+          </Border>
+          <Border Grid.Column="1" Classes="card">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+              <StackPanel Spacing="9">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Classes="section" Text="{Binding StudentFormTitle}" VerticalAlignment="Center"/>
+                  <Button Grid.Column="1" Content="New student" Command="{Binding NewStudentCommand}"/>
+                </Grid>
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="field" Text="Institutional student number"/>
+                  <TextBox PlaceholderText="Institutional student number (required)" Text="{Binding StudentNumber}" AutomationProperties.Name="Institutional student number"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="field" Text="Full name"/>
+                  <TextBox PlaceholderText="Full name (required)" Text="{Binding StudentName}" AutomationProperties.Name="Full name"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                  <TextBlock Classes="field" Text="Contact (optional)"/>
+                  <TextBox PlaceholderText="Email or phone" Text="{Binding StudentContact}" AutomationProperties.Name="Student contact"/>
+                </StackPanel>
+                <Button Classes="primary" Content="Save student" Command="{Binding SaveStudentCommand}" IsEnabled="{Binding CanWrite}"/>
+                <StackPanel IsVisible="{Binding HasStudent}" Spacing="7">
+                  <Separator Margin="0,3"/>
+                  <TextBlock Classes="field" Text="Borrowing eligibility"/>
+                  <WrapPanel>
+                    <Button Content="Permit borrowing" Command="{Binding PermitCommand}" IsEnabled="{Binding CanChangeEligibility}" Margin="0,0,8,4"/>
+                    <Button Content="Restrict borrowing" Command="{Binding RestrictCommand}" IsEnabled="{Binding CanChangeEligibility}"/>
+                  </WrapPanel>
+                  <TextBlock Classes="muted" Text="Restricted students can still return existing loans." TextWrapping="Wrap"/>
+                </StackPanel>
+                <Separator Margin="0,3"/>
+                <TextBlock Classes="field" Text="Student history"/>
+                <Button Content="Load selected student history" Command="{Binding StudentHistoryCommand}" IsEnabled="{Binding HasStudent}"/>
+                <TextBlock Classes="muted" Text="{Binding StudentHistoryState}" TextWrapping="Wrap"/>
+                <ListBox MaxHeight="280" ItemsSource="{Binding StudentHistory}" ItemTemplate="{StaticResource LoanTemplate}"/>
+              </StackPanel>
+            </ScrollViewer>
+          </Border>
+        </Grid>
+      </TabItem>
+      <TabItem Header="Borrowings &amp; returns">
+        <Border Classes="card" Margin="0,8">
+          <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" RowSpacing="10">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Classes="section" Text="Borrowing records"/>
+              <TextBlock Grid.Column="1" Classes="muted" Text="{Binding LoanState}" VerticalAlignment="Center"/>
+            </Grid>
+            <TextBox Grid.Row="1" PlaceholderText="Search student name, student number, or equipment name" Text="{Binding Search}">
+              <TextBox.KeyBindings><KeyBinding Gesture="Enter" Command="{Binding SearchLoansCommand}"/></TextBox.KeyBindings>
+            </TextBox>
+            <WrapPanel Grid.Row="2">
+              <StackPanel Spacing="3" Margin="0,0,8,4">
+                <TextBlock Classes="field" Text="Status"/>
+                <ComboBox Width="118" ItemsSource="{Binding Filters}" SelectedItem="{Binding Filter}" AutomationProperties.Name="Borrowing status"/>
+              </StackPanel>
+              <StackPanel Spacing="3" Margin="0,0,8,4">
+                <TextBlock Classes="field" Text="Sort by"/>
+                <ComboBox Width="140" ItemsSource="{Binding Sorts}" SelectedItem="{Binding Sort}" AutomationProperties.Name="Borrowing sort field"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom" Margin="0,0,0,4">
+                <CheckBox Content="Descending" IsChecked="{Binding Descending}"/>
+                <Button Classes="primary" Content="Apply filters" Command="{Binding SearchLoansCommand}"/>
+                <Button Content="Active only" Command="{Binding ActiveLoansCommand}"/>
+                <Button Content="Clear criteria" Command="{Binding ClearCriteriaCommand}"/>
+              </StackPanel>
+            </WrapPanel>
+            <Panel Grid.Row="3">
+              <ListBox ItemsSource="{Binding Loans}" SelectedItem="{Binding SelectedLoan}" ItemTemplate="{StaticResource LoanTemplate}"/>
+              <TextBlock Classes="empty" Text="No borrowing records to show. Clear the filters or check out equipment to start." IsVisible="{Binding ShowEmptyLoans}" IsHitTestVisible="False"/>
+            </Panel>
+            <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+              <TextBlock Classes="muted" Text="Select an active borrowing to return its equipment." VerticalAlignment="Center" TextWrapping="Wrap"/>
+              <Button Grid.Column="1" Classes="primary" Content="Confirm return of selected borrowing" Command="{Binding ReturnCommand}" IsEnabled="{Binding CanReturn}"/>
+            </Grid>
+          </Grid>
+        </Border>
+      </TabItem>
+    </TabControl>
+    <Border Grid.Row="3" Background="#E1EEEB" Padding="20,9" BorderBrush="#C9DCD7" BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+        <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+        <TextBlock Grid.Column="1" Classes="muted" Text="Dates use Asia/Manila" VerticalAlignment="Center"/>
+      </Grid>
+    </Border>
+  </Grid>
 </Window>

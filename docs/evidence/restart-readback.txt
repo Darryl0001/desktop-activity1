@@ -1,0 +1,4 @@
+PASS: process 1 committed one student, two items, and two active borrowings.
+PASS: new process after server restart read both active borrowings and unavailable items.
+PASS: separate process returned both original borrowing records.
+PASS: new process after second server restart read both returned records, actual dates, and available items.

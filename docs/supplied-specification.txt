@@ -1,0 +1,1079 @@
+we have this assignemnt of activity 4
+
+ITSD81 Lab Activity 4.pdf:
+ITSD 81 – Desktop Application Development 
+Laboratory Activity 4 — Advanced Data-Driven Workflows and PostgreSQL Integration 
+I. Activity Title and Overview 
+Continue the Campus Equipment Borrowing System from Laboratories 1–3. Transition its operational database from SQLite to PostgreSQL, retain its working borrowing and return functions, and extend it with student/equipment management, coordinated multi-item checkout and useful history/search workflows. You are acting as a junior developer receiving the supplied requirements package: decide and justify the design, implement it, and demonstrate the expected behavior. 
+II. Intended Learning Outcomes 
+At the end of this activity, students should be able to: 
+1. Interpret and implement a standardized actor-level use-case suite and business rules. 
+2. Adapt an existing EF Core application to PostgreSQL and reproduce its relational schema with migrations. 3. Build persistent student and equipment management while preserving related history. 
+4. Coordinate an atomic multi-item transaction and handle validation, stale data and persistence errors. 5. Retrieve and present related records asynchronously in responsive master-detail and search workflows. 6. Maintain MVVM and service/repository boundaries, verify integrated behavior and explain design decisions. 
+III. Scenario / Problem Statement 
+Laboratory staff must maintain student and equipment records, issue available equipment to eligible students and accept returns. They need to issue several items together without partial records, review student and equipment histories, and locate borrowing records efficiently. Preserve the Student, Equipment and Borrowing domain relationships from the earlier activities. 
+IV. Functional Requirements 
+Implement the five required continuations UC-01–05 and nine required new cases UC-06–09 and UC-12–16 in Appendix A and the separate Use Case Suite. Staff must be able to locate/select students and equipment within the relevant workflows. Student management includes registration, descriptive updates and eligibility; equipment management includes registration and descriptive updates. Borrowing history must include active and returned records. Search, filtering and sorting follow BR-17. Provide understandable success, rejection, empty, loading and error feedback. 
+V. Use Case and Workflow Requirements 
+The catalog, individually numbered business rules and fourteen tables in the separate Use Case Suite are the supplied specification appendix. Update your use-case diagram and catalog to reflect the scope and identify the custodian as primary actor. Submit a concise traceability matrix connecting the fourteen cases to your implemented behavior and verification evidence. You may adapt the supplied suite to document your solution, but must preserve its required fields, actor interactions, branches, rules and acceptance outcomes; do not create unnecessary include/extend relationships for
+1 
+internal validation. No additional documentation for deferred cases is required beyond their catalog classification. 
+VI. Technical and Architectural Requirements 
+Use C#/.NET, Avalonia/XAML, CommunityToolkit.Mvvm, EF Core, PostgreSQL/Npgsql, and Git. Preserve the conceptual path Avalonia View → ViewModel → Application Service → Repository Abstraction → EF Core Infrastructure → PostgreSQL. Views and ViewModels must not run SQL, directly access the database, configure connections, or execute migrations. Design dependency injection and database-context lifetimes appropriate to asynchronous operations; explain your decisions. Use asynchronous database access where appropriate, especially history and borrowing-list loading, and keep the UI responsive. You may refactor models, services, interfaces, mappings, migrations, ViewModels and registrations with justification. Continue the existing project and preserve prior Git history where available. 
+VII. PostgreSQL Transition Requirements 
+Configure EF Core with Npgsql and use PostgreSQL as the operational database. Provide migrations that reproduce the schema on a clean database, appropriate keys, relationships and constraints, and adapted database-backed repositories. Persist and retrieve student, equipment and borrowing records. Provide sufficient safe initial data without overwriting an existing database on every startup. Document installation, local connection configuration and migrations; do not commit credentials. Simultaneous SQLite support and historical SQLite row migration are not required. Docker, cloud deployment and paid services are not required. 
+VIII. Validation and Data Integrity 
+Apply BR-01–19 and the use-case tables. The limit is three active items; the expected return date is later than checkout; registration defaults are described in BR-02 and BR-06. Revalidate current information at the transaction boundary. UC-06 commits all selected borrowings and availability changes or none. Enforce relationships, uniqueness and single-active-item integrity in PostgreSQL as well as providing useful application validation. Preserve history when editing or returning. Handle unknown commit outcomes as specified in BR-18. No hard delete, maintenance or retirement workflow is mandatory. 
+IX. Expected Output 
+A working desktop application backed by PostgreSQL with the fourteen required use cases, reproducible schema, clear feedback, persistent related records and defensible architectural decisions. A successful build alone is not evidence of working database operations. 
+X. Submission Requirements 
+Each pair member must submit individually. Both submissions may refer to the same shared repository or solution archive. In a private comment or elsewhere in each submission, include the full names and student IDs of both partners. A student working alone must submit individually and include their own full name and student ID. Include: 
+1. Complete updated source and PostgreSQL migrations, plus meaningful Git development history; preserve prior history where available. An archive may include inspectable history or a concise history export. No fixed commit count is required. 
+2. README with prerequisites, installation, secret-free configuration, migration, initial data and execution steps; briefly explain key architecture, context lifetime and transaction decisions. Preserve relevant earlier documentation. 
+3. Updated use-case diagram and catalog, fourteen-case suite adapted from the supplied specification, and a brief use-case-to-acceptance evidence matrix.
+2 
+4. Concise schema/migration, verification and integration evidence for Appendix C, including success, rejection and safe failure cases, expected versus observed results, and restart readback. Source inspection and explanation support architecture evidence. 
+Automated tests are welcome but not mandatory. Both partners should understand the submitted work. 
+XI. Duration and Collaboration 
+Duration: three weeks. Work individually or as a confirmed pair; both members must submit, identifying both partners by name and student ID. 
+Milestone 
+Focus and evidence
+Week 1 
+Transition to PostgreSQL, apply migrations, preserve existing workflows, establish persistent student/equipment registration, editing and eligibility foundations.
+Week 2 
+Implement multi-item atomic checkout, student/equipment history and borrowing search/filter/sort; demonstrate initial validation and related queries.
+Week 3 
+Integrate workflows; verify constraints, rollback, error feedback and restart persistence; complete diagram, suite, traceability, README and concise evidence.
+
+
+
+XII. Constraints 
+Continue the same application; do not replace it with an unrelated system. Keep credentials out of submitted files and database operations out of Views and ViewModels. Do not require deletion, authentication, student self-service, API integration, exports, reporting, maintenance, retirement or other deferred/future functionality. Do not require a particular internal class structure, checkout parent entity, cloud service or paid infrastructure. 
+XIII. Assessment Rubric
+Criterion 
+Weight 
+Published assessment and proportional credit
+R1 — 
+Existing 
+workflows
+15% 
+UC-01–05: 3% each for correct independently demonstrated catalog, availability, single borrow, active list and return, including relevant rejection behavior.
+R2 — 
+PostgreSQL and integrity
+15% 
+Npgsql configuration and reproducible migrations 5%; real persistence/restart 5%; database keys, relationships and meaningful uniqueness/active-item constraints 5%.
+R3 — 
+Multi-item 
+checkout 
+and 
+transactions
+18% 
+Valid UC-06 checkout 6%; business-rule 
+rejection/revalidation 5%; atomic rollback, conflict and failure handling with evidence 7%.
+R4 — 
+Student ma 
+nagement
+12% 
+UC-12 registration 4%; UC-13 updates/history preservation 4%; UC-14 eligibility and active-loan behavior 4%.
+R5 — 
+Equipment 
+managemen t
+10% 
+UC-15 registration and initial availability 5%; UC-16 permitted edits and history/integrity preservation 5%.
+
+
+
+3 
+R6 — 
+Histories 
+and retrieval
+12% 
+UC-07 student history 4%; UC-08 equipment history 4%; UC-09 search/filter/sort 4%.
+R7 — 
+Architecture, MVVM and 
+responsive 
+UI
+10% 
+Meaningful layer boundaries and context/DI lifetime decisions 5%; MVVM integration, asynchronous loading, responsive and understandable states 5%. Assess source and explanation.
+R8 — 
+Verification 
+and docume ntation
+8% 
+Reproducible README, diagram/catalog/suite/traceability and explicit Git history evidence 4%; concise success, failure, integration and restart verification evidence 4%. Tests may be manual or automated.
+Total 
+100%
+
+
+
+
+
+Award partial credit for each independently demonstrated part. Assess a single underlying defect once in its primary criterion; do not repeat the same deduction in unrelated categories. Separate independently missing requirements may be assessed separately. No arbitrary naming, visual style, commit-count or automated-test requirement is hidden. Each mandatory use case maps to R1, R3, R4, R5 or R6 and to Appendix C. 
+Late policy: valid late work receives a separate 10-point deduction, with a floor of zero. This deduction is separate from the technical rubric. 
+XIV. Demonstration and Acceptance Checklist 
+- [ ] A01–A05: Demonstrate all existing workflows and relevant invalid/error cases, including borrow, restart, return and restart. 
+- [ ] A12–A14: Register, locate and edit a student; change eligibility and show its effect on new and existing borrowings. - [ ] A15–A16: Register, locate and edit equipment; prove protected transaction fields and preserved history. - [ ] A06: Issue multiple items; show each rejection and a safe in-transaction failure with no partial changes. 
+- [ ] A07–A09: Show accurate related histories and search, filter, sorting, empty/error states and responsive asynchronous loading. 
+- [ ] A17–A18: Apply migrations to a clean PostgreSQL database; demonstrate constraints, failure feedback and recovery; explain architecture and context lifetimes. 
+- [ ] A19: Provide the diagram, catalog, suite, traceability, setup instructions, Git history and concise integration/restart evidence. 
+Use a disposable database for deliberate integrity and failure demonstrations. The instructor may inspect source and ask for a short walkthrough. 
+Appendix A — Use Case Catalog
+ID 
+Use case 
+Lab 4 classification
+UC-01 
+View Equipment Catalog 
+Required continuation
+UC-02 
+Find Available Equipment 
+Required continuation
+
+
+
+4 
+UC-03 
+Borrow Equipment 
+Required continuation
+UC-04 
+View Active Borrowings 
+Required continuation
+UC-05 
+Return Equipment 
+Required continuation
+UC-06 
+Check Out Multiple Equipment Items 
+Required new
+UC-07 
+View Student Borrowing History 
+Required new
+UC-08 
+View Equipment Borrowing History 
+Required new
+UC-09 
+Search, Filter, and Sort Borrowings 
+Required new
+UC-10 
+View Overdue Borrowings 
+Deferred to Laboratory Activity 5
+UC-11 
+View Current Equipment Holder 
+Deferred to Laboratory Activity 5
+UC-12 
+Register Student 
+Required new
+UC-13 
+Update Student Information 
+Required new
+UC-14 
+Change Student Borrowing Eligibility 
+Required new
+UC-15 
+Register Equipment 
+Required new
+UC-16 
+Update Equipment Information 
+Required new
+UC-17 
+Retire Equipment from Circulation 
+Deferred to Laboratory Activity 5
+UC-18 
+Mark Equipment as Under Maintenance 
+Deferred to Laboratory Activity 5
+UC-19 
+Restore Equipment to Circulation 
+Deferred to Laboratory Activity 5
+UC-20 
+Record Equipment Condition Upon Return 
+Deferred to Laboratory Activity 5
+UC-21 
+Renew or Extend an Active Borrowing 
+Deferred to Laboratory Activity 5
+UC-22 
+Return Multiple Equipment Items 
+Deferred to Laboratory Activity 5
+UC-23 
+View Borrowings Due Soon 
+Deferred to Laboratory Activity 5
+UC-24 
+View Student's Active Borrowing Count 
+Deferred to Laboratory Activity 5
+UC-25 
+View Equipment Utilization Summary 
+Deferred to Laboratory Activity 5
+UC-26 
+Manage Equipment Categories 
+Deferred to Laboratory Activity 5
+UC-27 
+Void an Erroneous Borrowing Without Erasing Its History 
+Deferred to Laboratory Activity 5
+UC-28 
+Request an Equipment Reservation 
+Future scope
+UC-29 
+Approve, Reject, or Cancel Reservations 
+Future scope
+UC-30 
+Review Staff Action Audit History 
+Future scope
+UC-31 
+Manage Staff Accounts and Permissions 
+Future scope
+UC-32 
+Export Borrowing Reports 
+Future scope
+UC-33 
+Integrate External Services or Notifications 
+Future scope
+
+
+
+5
+Appendix B — Business Rules and Operational Policies The following rules govern the required workflows. 
+Students and equipment 
+- BR-01 — Student identity: Each student has a required institutional student number, unique after trimming leading/trailing whitespace and case-insensitive comparison. Empty or duplicate numbers are rejected by validation and database enforcement. 
+- BR-02 — Student attributes: A student has a required nonblank full name and student number. Contact information is optional; if supplied, it must be nonblank after trimming. A newly registered student is eligible to borrow. No email format or additional personal data is required. 
+- BR-03 — Student updates: Staff may edit the full name, optional contact information, and institutional number, subject to BR-01–02. A blank optional contact clears it. The stable internal identity and all existing borrowing relationships and history remain intact; eligibility changes use UC-14. 
+- BR-04 — Eligibility changes: Staff may permit or restrict an existing student. Restriction prevents new borrowing, but does not cancel, erase, or prevent return of existing active borrowings. Repeating the current choice causes no unintended change and gives understandable feedback. 
+- BR-05 — Equipment identity: Each physical item has a required, nonblank unique equipment identifier; trim surrounding whitespace and compare identifiers case-insensitively. Enforce uniqueness in validation and the database. 
+- BR-06 — Equipment attributes and registration: An item has a required nonblank name and identifier, plus an optional description/type. A blank optional description is stored as absent. Newly registered equipment is available and has no active borrowing. 
+- BR-07 — Equipment updates: Staff may edit identifier, name and description subject to BR-05–06; the stable internal identity and borrowing history remain intact. Availability, borrowing status and return dates are not editable descriptive fields; they change only through the applicable borrowing/return workflow. Maintenance and retirement are deferred. 
+Borrowing and history 
+- BR-08 — Eligibility and references: A borrowing requires an existing eligible student and existing selected equipment. A missing or stale reference is rejected without creating records. 
+- BR-09 — Active limit: A student may have at most three active item borrowings. Existing active records plus distinct items requested must not exceed three. UC-03 counts one item; UC-06 counts all selected items. 
+- BR-10 — Availability: An item is borrowable only if available and without an active borrowing. A successful issue makes it unavailable; a successful return makes it available. A database constraint or equivalent database-enforced protection must prevent more than one active borrowing for the same item. 
+- BR-11 — Checkout date: The expected return date must be later than the checkout date, using consistently documented local calendar dates. An absent or invalid date is rejected. 
+- BR-12 — Multi-item request: UC-06 requires at least two distinct items for one student and one expected return date. Reject duplicates and invalid selections rather than silently counting or omitting them. Create one active borrowing per item; a checkout parent entity is optional.
+6 
+- BR-13 — Return transition: Only an active borrowing may be returned. Record the actual return date as the local calendar date of return, which cannot precede checkout; a future expected date does not prevent early return. Mark the record returned, retain it, and make the item available. Reject a repeat return without changing state. 
+- BR-14 — History and relationships: Each borrowing refers to exactly one existing student and one existing physical item through enforced foreign keys. History retains active and returned records, dates and relationships through edits and returns. Do not hard-delete students, equipment or borrowing history as part of required Lab 4 functionality. 
+Integrity, retrieval and recovery 
+- BR-15 — Revalidation and atomicity: Recheck current eligibility, active count, references and availability at the transaction boundary. A multi-item issue commits every borrowing and related availability change together or commits none. A conflicting update must not produce duplicate active borrowings or partial checkout; reject and refresh as appropriate. No distributed infrastructure or particular locking technique is prescribed. 
+- BR-16 — Database integrity: PostgreSQL enforces primary keys, foreign keys, required fields, student/equipment identifier uniqueness and the single-active-borrowing protection. Consistent normalization of identifiers must match the uniqueness enforcement. Application validation supplements, not replaces, these constraints. 
+- BR-17 — Search and results: Search by case-insensitive partial text in student name, institutional number or equipment name; trim surrounding search whitespace. Filter active, returned or all; sort by checkout date or expected return date, ascending or descending, with a stable borrowing identifier as a tie-breaker. Criteria may combine and can be cleared. Display matching records accurately; show an explicit empty state rather than an error for no matches. 
+- BR-18 — Errors and unknown outcomes: Explain validation rejections and database failures without exposing credentials. Known failed writes leave no partial changes and do not report success. If connection loss makes commit outcome unknown, say so, do not automatically retry or assert rollback, and reconnect and refresh before a staff decision; the underlying transaction remains all-or-nothing. Let users retry after recovery. 
+- BR-19 — Persistence and loading: Store and retrieve required student, equipment and borrowing changes in PostgreSQL across application restarts. Load database-backed histories and borrowing search asynchronously with observable loading/error state and a responsive window. Distinguish missing records, no matches and connection failures. 
+Appendix C — Acceptance and Traceability Matrix 
+Use disposable PostgreSQL data with multiple students and items, distinct active and returned histories, an ineligible student, available and unavailable equipment, and subjects with no history. For every scenario record the setup, action, expected and observed result, and evidence. A live or recorded demonstration, targeted database readback, or automated checks may be combined; automated tests are not mandatory. A screenshot alone does not establish persistence, atomicity or architecture. Database reads for verification must use a fresh context or connection after the operation.
+ID / use case 
+Functional success and rejection / failure scenario
+Rules 
+Expected PostgreSQL state and evidence
+Criterion
+A01 / UC-01 
+Open catalog; compare identities and availability; repeat with an empty catalog and a failed connection.
+BR-05–07, 10, 
+18–19
+No changes; compare list with 
+database and show empty versus error feedback.
+R1
+A02 / UC-02 
+Find available equipment; demonstrate no matches and failed load.
+BR-10, 18–19 
+No changes; list excludes unavailable items; compare with database.
+R1
+
+
+
+7 
+A03 / UC-03 
+Issue one available item to an eligible student; separately reject ineligible, missing, unavailable, over-limit and invalid-date requests.
+BR-08–11, 14–16, 18–19
+Success creates one active record and unavailable item; rejected 
+requests leave data unchanged. Show UI and fresh database read, including restart.
+R1, R2
+A04 / UC-04 
+Display active borrowings with student and equipment; show empty and connection-error cases.
+BR-14, 18–19 
+No changes; returned records 
+excluded. Compare results to 
+database.
+R1
+A05 / UC-05 
+Return active equipment; attempt repeat return and a stale/missing selection.
+BR-10, 13–16, 
+18–19
+Same record becomes returned with date, item available, history retained; repeat causes no change. Read back after restart.
+R1, R2
+A06 / UC-06 
+Issue two distinct available items; individually reject duplicate, fewer than two, unavailable/missing, invalid-date, ineligible and over-limit requests. Test exactly at the limit. Force a failure after a write is attempted inside the 
+transaction.
+BR-08–12, 14–16, 18–19
+Success persists both active rows and availability changes. Each 
+rejection and known in-transaction failure leaves no request changes. Compare fresh before/after database reads; document failure point.
+R3
+A07 / UC-07 
+Select two students with 
+distinguishable active/returned histories and one with none; try missing/stale selection and failed load.
+BR-14, 18–19 
+No changes; correct item/date/status details for each student, empty and error distinguished. Demonstrate UI and inspect asynchronous path.
+R6, R7
+A08 / UC-08 
+Select two items with distinguishable active/returned histories and one with none; try missing/stale selection and failed load.
+BR-14, 18–19 
+No changes; correct 
+student/date/status details, empty and error distinguished. Demonstrate UI and inspect asynchronous path.
+R6, R7
+A09 / UC-09 
+Search each field; use each status, both sort fields and directions, 
+combined criteria and reset; 
+demonstrate no matches and 
+connection error.
+BR-17–19 
+No changes; compare ordering and membership to controlled records; show responsive load and inspect asynchronous path.
+R6, R7
+A12 / UC-12 
+Register and retrieve a student; reject blank required fields and duplicate number, including case/whitespace variation.
+BR-01–02, 16, 
+18–19
+Exactly one normalized-unique 
+student persists after restart; rejected requests add none. Show UI and database constraint/readback.
+R4, R2
+A13 / UC-13 
+Find, select and edit a student with history; clear optional contact; reject blank required fields and a duplicate number.
+BR-01–03, 14, 16, 18–19
+Edited data persists on same identity; existing borrowing foreign 
+keys/history remain; rejected updates make no change. Compare database before/after and restart.
+R4
+A14 / UC-14 
+Restrict an active borrower; reject a new issue, return an existing 
+borrowing, then permit and perform an otherwise valid issue. Show 
+repeated-state feedback.
+BR-04, 08, 13–14, 18–19
+Eligibility persists, active records are not cancelled and return remains possible. Read back states and linked records.
+R4
+A15 / UC-15 
+Register and retrieve equipment; reject blank required fields and normalized duplicate identifier.
+BR-05–06, 10, 16, 18–19
+One new available item with no active borrowing persists after restart; invalid requests add none. Show UI and database constraint/readback.
+R5, R2
+
+
+
+8
+A16 / UC-16 
+Find and edit an item with history; clear optional description; reject 
+blank/duplicate values and attempts to edit availability as descriptive data.
+BR-05–07, 10, 14, 16, 18–19
+Permitted changes persist on same identity; history and availability remain intact. Compare before/after and restart.
+R5
+A17 / 
+Cross-cutting
+Apply migrations to a clean 
+PostgreSQL database; inspect schema and migration history; attempt invalid foreign key, duplicate identifiers and a second active borrowing for one item in a disposable database.
+BR-01, 05, 10, 14, 16
+Invalid writes are rejected by the database. Show migration output, schema/constraint evidence and fresh reads.
+R2
+A18 / 
+Cross-cutting
+Disconnect before an operation or use a safe controlled persistence failure; restore service and retry after checking state. Inspect code and explain 
+layer/context lifetimes and transaction boundary.
+BR-15, 18–19 
+Clear failure, no false success or partial known-failure changes; 
+restored access works. Show 
+UI/readback and code walkthrough, not screenshots alone.
+R3, R7, R8
+A19 / 
+Cross-cutting
+Review diagram, catalog, suite and traceability against actual 
+implementation and evidence; follow README setup and migration steps.
+All relevant rules 
+No data modification required beyond a disposable setup; source, 
+instructions and evidence agree.
+R8
+
+
+
+Safe atomicity demonstration: use a disposable database and a controlled test seam or deliberately arranged constraint failure within the transaction. Show that at least one write was attempted before failure, then query borrowing and availability state through a fresh connection. Do not damage a shared database. A connection loss at commit can leave an unknown outcome; demonstrate clear handling and verify state rather than asserting rollback. 
+Integrated demonstration sequence 
+1. Student foundation (A12–A13): Register a student, retrieve and update the record. Expect one durable identity and revised data; demonstrate with UI and database readback. 
+2. Equipment foundation (A15–A16): Register, retrieve and edit an item. Expect one durable available item with revised descriptive fields; show database readback. 
+3. Cross-workflow borrowing (A03, A12, A15): Issue the newly registered item to the newly registered eligible student. Expect linked active record and unavailable item; inspect related rows. 
+4. Eligibility and return (A14, A05): Restrict the student, show a new request rejected while the existing issue remains, and return that item. Expect retained returned history and available equipment; read back. 
+5. Successful coordinated checkout (A06): Permit the student and issue two distinct items. Expect both active records and both availability changes after restart; inspect database state. 
+6. Invalid and failed checkout (A06): Request one unavailable item with another item, then safely induce a failure during a transaction. Expect zero partial records or availability changes in both cases; compare fresh before/after reads. 
+7. Related histories (A07–A08): Borrow and return an item, then select its student and equipment. Expect the same returned event and dates in both histories, with unrelated records excluded. 
+8. Retrieval controls (A09): Search, filter and sort a known mixture of active and returned records. Expect matching membership and requested order; demonstrate reset and no matches.
+9 
+9. Restart and recovery (A03, A12–A16, A18): Restart and retrieve new/edited student, equipment and borrowing states; demonstrate a safe database error, understandable feedback and recovery after reconnection.
+10 
+
+
+
+ITSD81 Lab Activity 4 Use Case Suite.pdf:
+ITSD 81 — Laboratory Activity 4 
+Use Case Suite 
+Complete Tabular Use Case Suite 
+This appendix is supplied as the requirements specification. Each case is an actor-level user goal; internal validation is not a separate use case. The supporting system is PostgreSQL for all cases. “None” under Includes / Extends means no UML relationship is required. All cases follow the business rules in Appendix B. 
+UC-01 — View Equipment Catalog 
+Field 
+Specification
+Use Case ID 
+UC-01
+Use Case Name 
+View Equipment Catalog
+Scope 
+Equipment catalog
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff opens the equipment catalog.
+Preconditions 
+Application is running.
+Success Guarantee 
+Current equipment identifiers, names, descriptions and availability are displayed; no records change.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff opens the catalog. 
+2. System retrieves equipment from PostgreSQL. 
+3. System displays each item and availability.
+Alternative Flows 
+2a. No equipment: system displays an empty state.
+Exception Flows 
+2e. Database unavailable: system displays an error and retry option.
+Business Rules 
+BR-05–07, BR-10, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Catalog matches database records, including availability; empty and database-error states are distinguishable. See A01.
+Open Issues 
+None.
+
+
+
+UC-02 — Find Available Equipment
+1 
+Field 
+Specification
+Use Case ID 
+UC-02
+Use Case Name 
+Find Available Equipment
+Scope 
+Equipment catalog
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff requests available equipment.
+Preconditions 
+Application is running.
+Success Guarantee 
+Only currently available items are shown; no records change.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff chooses the available-items view/filter. 
+2. System retrieves current equipment state. 
+3. System displays only available items.
+Alternative Flows 
+3a. No items available: system shows an empty result.
+Exception Flows 
+2e. Database failure: system shows an error and permits retry.
+Business Rules 
+BR-10, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Available items appear, unavailable items do not, and no-match/error states differ. See A02.
+Open Issues 
+None.
+
+
+
+UC-03 — Borrow Equipment
+Field 
+Specification
+Use Case ID 
+UC-03
+Use Case Name 
+Borrow Equipment
+Scope 
+Borrowing
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff submits a single-item borrowing.
+
+
+
+2 
+Preconditions 
+Application is running; staff can select a student and item.
+Success Guarantee 
+One active borrowing and the corresponding unavailable state are persisted together.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff selects a student, item and expected return date. 
+2. System revalidates student, limit, date and item. 
+3. System saves the active borrowing and availability change. 
+4. System confirms and refreshes.
+Alternative Flows 
+2a. Missing, ineligible, over-limit, unavailable or invalid-date request: system rejects with a reason and no change.
+Exception Flows 
+2e. Stale record or conflict: system rejects and refreshes. 
+3e. Database failure: system reports failure or unknown outcome under BR-18.
+Business Rules 
+BR-08–11, BR-14–16, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Valid single issue persists; each invalid condition is rejected without changes; outcome survives restart. See A03.
+Open Issues 
+None.
+
+
+
+UC-04 — View Active Borrowings
+Field 
+Specification
+Use Case ID 
+UC-04
+Use Case Name 
+View Active Borrowings
+Scope 
+Borrowing
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff opens active borrowings.
+Preconditions 
+Application is running.
+Success Guarantee 
+Only active records with related students and equipment are displayed; nothing changes.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+
+
+
+3 
+Main Success Scenario 
+1. Staff opens active borrowings. 
+2. System retrieves active records and related student and equipment. 
+3. System displays identities and relevant dates.
+Alternative Flows 
+3a. No active records: system displays an empty state.
+Exception Flows 
+2e. Database failure: system reports an error and allows retry.
+Business Rules 
+BR-14, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Active records and related identities are correct; returned records are excluded; empty/error states differ. See A04.
+Open Issues 
+None.
+
+
+
+UC-05 — Return Equipment
+Field 
+Specification
+Use Case ID 
+UC-05
+Use Case Name 
+Return Equipment
+Scope 
+Borrowing
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff submits return of a selected active borrowing.
+Preconditions 
+An active borrowing can be selected.
+Success Guarantee 
+The same borrowing is returned with a return date and the item becomes available, with history preserved.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff selects an active borrowing and confirms return. 
+2. System verifies its current status. 
+3. System records return and availability together. 
+4. System confirms and refreshes.
+Alternative Flows 
+2a. Already returned: system rejects the repeat without changing data.
+Exception Flows 
+2e. Missing or stale record: system reports the issue and refreshes. 
+3e. Database failure: system reports failure or unknown outcome under BR-18.
+
+
+
+4 
+Business Rules 
+BR-10, BR-13–16, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Return persists across restart, equipment is available, history remains, and repeat return is rejected. See A05.
+Open Issues 
+None.
+
+
+
+UC-06 — Check Out Multiple Equipment Items
+Field 
+Specification
+Use Case ID 
+UC-06
+Use Case Name 
+Check Out Multiple Equipment Items
+Scope 
+Borrowing
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff submits a multi-item checkout.
+Preconditions 
+Application is running; student and equipment can be selected.
+Success Guarantee 
+One active borrowing per selected item and all corresponding availability changes are committed together.
+Failure Guarantee 
+A known failed or rejected transaction leaves no changes; if commit acknowledgement is lost, the outcome is unknown until verified, with no partial commit.
+Main Success Scenario 
+1. Staff selects a student, at least two items and an expected return date. 
+2. System revalidates current references, eligibility, count, item availability and date. 3. System commits all records and availability changes as one transaction. 
+4. System confirms and refreshes.
+Alternative Flows 
+2a. Duplicate/fewer than two items, invalid date, ineligible student, limit violation or unavailable item: system rejects with a reason; staff may correct.
+Exception Flows 
+2e. Stale or conflicting state: system rejects and refreshes. 
+3e. Known write failure: system rolls back and reports failure. 
+3f. Commit outcome unknown: system follows BR-18.
+Business Rules 
+BR-08–12, BR-14–16, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+
+
+
+5 
+Acceptance Criteria 
+Two valid items produce two persisted active records; each invalid request produces none; controlled in-transaction failure leaves no partial changes. See A06.
+Open Issues 
+None.
+
+
+
+UC-07 — View Student Borrowing History 
+Field 
+Specification
+Use Case ID 
+UC-07
+Use Case Name 
+View Student Borrowing History
+Scope 
+Student history
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff selects a student and opens history.
+Preconditions 
+Application is running; student selection is available.
+Success Guarantee 
+Only the selected student's active and returned records and related equipment are shown; no data changes.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff selects a student. 
+2. System asynchronously retrieves related borrowings and equipment. 
+3. System displays student identity, item, checkout, expected return, status and actual return when present.
+Alternative Flows 
+3a. No history: system displays an empty state. 
+1a. Staff selects another student: system replaces results with that student's data.
+Exception Flows 
+2e. Missing/stale student or database failure: system explains the problem and allows reselection or retry.
+Business Rules 
+BR-14, BR-18–19
+Special Requirements 
+PostgreSQL-backed asynchronous loading, responsive window, loading and error states.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Two students' distinguishable records do not mix; active, returned and empty results are accurate; loading is responsive. See A07.
+Open Issues 
+None.
+
+
+
+UC-08 — View Equipment Borrowing History
+6 
+Field 
+Specification
+Use Case ID 
+UC-08
+Use Case Name 
+View Equipment Borrowing History
+Scope 
+Equipment history
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff selects equipment and opens history.
+Preconditions 
+Application is running; equipment selection is available.
+Success Guarantee 
+Only the selected item's active and returned records and related students are shown; no data changes.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff selects an item. 
+2. System asynchronously retrieves its borrowings and students. 
+3. System displays equipment identity, student, checkout, expected return, status and actual return when present.
+Alternative Flows 
+3a. No history: system displays an empty state. 
+1a. Staff selects another item: system replaces the details.
+Exception Flows 
+2e. Missing/stale item or database failure: system explains the problem and allows reselection or retry.
+Business Rules 
+BR-14, BR-18–19
+Special Requirements 
+PostgreSQL-backed asynchronous loading, responsive window, loading and error states.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Two items' distinguishable records do not mix; active, returned and empty results are accurate; loading is responsive. See A08.
+Open Issues 
+None.
+
+
+
+UC-09 — Search, Filter, and Sort Borrowings
+Field 
+Specification
+Use Case ID 
+UC-09
+Use Case Name 
+Search, Filter, and Sort Borrowings
+Scope 
+Borrowing queries
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+
+
+
+7 
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff enters criteria or opens the borrowing list.
+Preconditions 
+Application is running.
+Success Guarantee 
+Only matching records are shown in the requested order; no data changes.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff opens borrowings and chooses search text, status filter and/or sort. 
+2. System asynchronously loads matching related records. 
+3. System displays student, equipment, dates and status in the selected order. 
+4. Staff may clear criteria.
+Alternative Flows 
+1a. Criteria may be used separately or together. 
+3a. No matches: system shows an empty result. 
+4a. Clear restores the full list.
+Exception Flows 
+2e. Database failure: system reports an error and offers retry.
+Business Rules 
+BR-17–19
+Special Requirements 
+PostgreSQL-backed asynchronous loading, responsive window, loading and error states.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Search each specified field, each status, both sort fields/directions, combined criteria and reset against known data. See A09.
+Open Issues 
+None.
+
+
+
+UC-12 — Register Student
+Field 
+Specification
+Use Case ID 
+UC-12
+Use Case Name 
+Register Student
+Scope 
+Student management
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff submits a new student.
+Preconditions 
+Application is running; registration form is accessible.
+Success Guarantee 
+One uniquely identified student with the supplied details and default eligibility is persisted.
+
+
+
+8 
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff enters institutional number, full name and optional contact. 
+2. System validates required fields and uniqueness. 
+3. System saves the student. 
+4. System confirms and displays the saved record.
+Alternative Flows 
+2a. Missing/blank required data or duplicate normalized number: system rejects and identifies the problem. 
+1a. Optional contact omitted: system stores it as absent.
+Exception Flows 
+3e. Concurrent duplicate or database failure: system reports failure or unknown outcome under BR-18; no duplicate is created.
+Business Rules 
+BR-01–02, BR-16, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Valid student can be retrieved after restart; empty name/number and duplicate number are rejected. See A12.
+Open Issues 
+None.
+
+
+
+UC-13 — Update Student Information
+Field 
+Specification
+Use Case ID 
+UC-13
+Use Case Name 
+Update Student Information
+Scope 
+Student management
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff submits changes to a selected student.
+Preconditions 
+A student exists and can be located and selected.
+Success Guarantee 
+Allowed changes persist for the same student; borrowing relationships and history remain intact.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+
+
+
+9 
+Main Success Scenario 
+1. Staff finds and selects a student. 
+2. Staff edits permitted fields and submits. 
+3. System validates and saves the changes. 
+4. System confirms and displays the updated record.
+Alternative Flows 
+2a. Staff leaves optional contact blank: system clears it. 
+3a. Blank required field or duplicate number: system rejects without changes.
+Exception Flows 
+3e. Student no longer exists, conflicting update or database failure: system reports the issue and refreshes/retries under BR-18.
+Business Rules 
+BR-01–03, BR-14, BR-16, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Locate and update a student, restart, and verify changed details and unchanged linked borrowings; reject invalid and duplicate edits. See A13.
+Open Issues 
+None.
+
+
+
+UC-14 — Change Student Borrowing Eligibility
+Field 
+Specification
+Use Case ID 
+UC-14
+Use Case Name 
+Change Student Borrowing Eligibility
+Scope 
+Student management
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff requests a change to a student's eligibility.
+Preconditions 
+A student exists and can be selected.
+Success Guarantee 
+Requested eligibility is persisted; existing active borrowings and history are unchanged.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff finds and selects a student. 
+2. Staff chooses permit or restrict and submits. 
+3. System saves and confirms the current eligibility.
+Alternative Flows 
+2a. Requested state is already set: system informs staff and makes no unintended changes. 3a. Restricted student with active loans may still return them.
+
+
+
+10 
+Exception Flows 
+3e. Student missing/stale or database failure: system reports failure or unknown outcome under BR-18.
+Business Rules 
+BR-04, BR-08, BR-13–14, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Restriction persists and blocks a new issue without changing active loans; return remains possible; permitting allows an otherwise valid request. See A14.
+Open Issues 
+None.
+
+
+
+UC-15 — Register Equipment
+Field 
+Specification
+Use Case ID 
+UC-15
+Use Case Name 
+Register Equipment
+Scope 
+Equipment management
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff submits a new physical item.
+Preconditions 
+Application is running; registration form is accessible.
+Success Guarantee 
+One uniquely identified item is persisted as available with no active borrowing.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff enters an equipment identifier, name and optional description. 
+2. System validates required fields and uniqueness. 
+3. System saves the item with initial availability. 
+4. System confirms and displays it.
+Alternative Flows 
+2a. Required field blank or normalized identifier duplicate: system rejects and identifies the issue. 1a. Optional description omitted: system stores it as absent.
+Exception Flows 
+3e. Concurrent duplicate or database failure: system reports failure or unknown outcome under BR-18; no duplicate is created.
+Business Rules 
+BR-05–06, BR-10, BR-16, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Valid item appears as available after restart; missing required fields and duplicate identifier are rejected. See A15.
+
+
+
+11 
+Open Issues 
+None.
+
+
+
+UC-16 — Update Equipment Information
+Field 
+Specification
+Use Case ID 
+UC-16
+Use Case Name 
+Update Equipment Information
+Scope 
+Equipment management
+Level 
+User Goal
+Primary Actor 
+Laboratory Staff / Equipment Custodian
+Stakeholders and Interests 
+Custodian: accurate, understandable workflow; students: correct records and preserved history.
+Trigger 
+Staff submits changes to selected equipment.
+Preconditions 
+An item exists and can be located and selected.
+Success Guarantee 
+Allowed descriptive changes persist for the same item; availability and borrowing history remain intact.
+Failure Guarantee 
+A rejected or known failed operation preserves existing data; an unknown commit outcome is handled under BR-18.
+Main Success Scenario 
+1. Staff finds and selects an item. 
+2. Staff edits permitted identifier, name or description and submits. 
+3. System validates and saves changes. 
+4. System confirms and displays updated details.
+Alternative Flows 
+2a. Staff clears optional description: system stores it as absent. 
+3a. Blank required field or duplicate identifier: system rejects without changes. 
+2b. Availability and borrowing state cannot be edited as descriptive fields.
+Exception Flows 
+3e. Item missing/stale, conflicting update or database failure: system reports the issue and refreshes/retries under BR-18.
+Business Rules 
+BR-05–07, BR-10, BR-14, BR-16, BR-18–19
+Special Requirements 
+PostgreSQL persistence; meaningful feedback and separation of responsibilities.
+Includes / Extends 
+None required.
+Acceptance Criteria 
+Edit and restart preserves new details and linked history/availability; duplicate and blank required edits are rejected. See A16.
+Open Issues 
+None.
+
+
+
+12

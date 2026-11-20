@@ -1,0 +1,35 @@
+90f0367 2026-10-04 Document SQLite persistence architecture
+af51394 2026-10-04 Add database design diagram
+78a0acd 2026-10-04 Add database query documentation
+85f5443 2026-10-04 Add LINQ database queries
+3e6a715 2026-10-04 Connect Avalonia application to SQLite
+90a2a4c 2026-10-04 Replace in-memory dependency registrations
+5781cea 2026-10-04 Implement EF borrowing repository
+7ffb397 2026-10-04 Implement EF student repository
+dbb0101 2026-10-04 Implement EF equipment repository
+630ae47 2026-10-04 Add EF Core design-time DbContext factory
+39d79b7 2026-10-04 Add initial database seed data
+ebc1e79 2026-10-04 Create initial database migration
+13e6596 2026-10-04 Configure entity relationships
+58ae3f9 2026-10-04 Create application DbContext
+84fc27d 2026-10-04 Add SQLite and EF Core packages
+a08c6d3 2026-09-11 Merge pull request #1 from neknekneksss/main
+210881a 2026-09-11 Merge branch 'main' of https://github.com/neknekneksss/desktop-activity1
+c8655ce 2026-09-11 Fix status message overwrite bug and update README
+0ebf8f6 2026-09-11 Enhance README with architecture and flow details
+11a77df 2026-09-11 Replace manual composition with Microsoft.Extensions.DependencyInjection
+62e9e53 2026-09-10 changed color on selections column
+0cf22f0 2026-09-09 Implement Borrow and Return Equipment workflows
+e57e461 2026-09-08 created equipment desktop using avalonia ui and mvvm
+e2cc5d5 2026-08-28 Update README.md
+dda5ac3 2026-08-28 Update README.md
+86b7a6e 2026-08-28 Update README with Dependency Inversion Principle details
+b4a7d53 2026-08-28 Add Architecture Reflection section to README
+c98e179 2026-08-27 Update README.md
+f40dd70 2026-08-27 Complete architecture documentation
+2a9b1db 2026-08-27 Add borrowing demonstratio
+8ee8066 2026-08-27 added in memory repository
+7f2cd17 2026-08-27 added borrowing service
+4f5620b 2026-08-27 added repository abstartions
+7314bda 2026-08-27 added domain models
+82feff1 2026-08-27 initial solution structure
