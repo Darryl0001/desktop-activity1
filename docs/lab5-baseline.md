@@ -4,7 +4,7 @@
 | --- | --- |
 | Lab 4 baseline | `bcb791c45c8950226f8f44ea0edb43a7d6a2dc3a` (`laboratory 4 commit`) in the original `Darryl0001/desktop-activity1` repository. The checked-out `main` and local `origin/main` both pointed to this revision when Lab 5 began. |
 | Baseline limitation | The commit and local remote-tracking reference identify the Lab 4 snapshot. A classroom submission receipt was unavailable for independent comparison. |
-| Lab 5 revision | Verified implementation commit `ae5885fb15261daccca755ed72dd759826033940`. The `lab5-submitted` tag on `codex/lab5` also includes the consolidated results and evidence. Run `git rev-parse lab5-submitted^{commit}` to resolve the full submission hash. |
+| Lab 5 revision | Verified implementation commit `ae5885fb15261daccca755ed72dd759826033940`. The `lab5-submitted` tag also includes the consolidated results and evidence. Run `git rev-parse lab5-submitted^{commit}` to resolve the full submission hash. |
 | Persistence migration | The two original PostgreSQL migrations and their model snapshot are carried forward. Lab 5 adds no schema change. The verification runner applies both migrations to a fresh database. |
 | Setup and evidence | See the [README](../README.md) and [consolidated acceptance record](lab5-acceptance.md). |
 
