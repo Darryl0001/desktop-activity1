@@ -39,6 +39,13 @@ public class WorkspaceTests
                 new Student { Id = 1, StudentNumber = "2026-0001", Name = "Juan Dela Cruz", Version = 1 },
                 new Student { Id = 2, StudentNumber = "2026-0002", Name = "Maria Santos", Version = 1 } });
         }
+        public async Task<IReadOnlyList<Student>> SearchStudentsAsync(string search, CancellationToken ct = default) =>
+            (await StudentsAsync(ct)).Where(student => student.Name.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase)
+                || student.StudentNumber.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase)).ToArray();
+        public async Task<Student?> StudentAsync(int id, CancellationToken ct = default) =>
+            (await StudentsAsync(ct)).SingleOrDefault(student => student.Id == id);
+        public async Task<Equipment?> EquipmentItemAsync(int id, CancellationToken ct = default) =>
+            (await EquipmentAsync(false, ct)).SingleOrDefault(item => item.Id == id);
         public Task<IReadOnlyList<Equipment>> EquipmentAsync(bool availableOnly, CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<Equipment>>(new[] {
                 new Equipment { Id = 1, Identifier = "EQ-001", Name = "Laptop", Description = "Portable computer", Version = 1 },

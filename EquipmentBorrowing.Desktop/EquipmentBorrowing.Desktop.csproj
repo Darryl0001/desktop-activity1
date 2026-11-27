@@ -21,6 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\src\EquipmentBorrowing.Application\EquipmentBorrowing.Application.csproj" />
-    <ProjectReference Include="..\src\EquipmentBorrowing.Infrastructure\EquipmentBorrowing.Infrastructure.csproj" />
+    <ProjectReference Include="..\src\EquipmentBorrowing.Contracts\EquipmentBorrowing.Contracts.csproj" />
   </ItemGroup>
 </Project>

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EquipmentBorrowing.Application;
-using EquipmentBorrowing.Application.Services;
+using EquipmentBorrowing.Desktop.Services;
 using EquipmentBorrowing.Domain;
 
 namespace EquipmentBorrowing.Desktop.ViewModels;
@@ -20,8 +20,8 @@ public partial class EquipmentRow(Equipment item) : ObservableObject
 }
 public partial class WorkbenchViewModel : ObservableObject
 {
-    private readonly LabService service;
-    public WorkbenchViewModel(LabService service)
+    private readonly ILabOperations service;
+    public WorkbenchViewModel(ILabOperations service)
     {
         this.service = service;
         Students.CollectionChanged += (_, _) => OnPropertyChanged(nameof(StudentState));
@@ -33,11 +33,11 @@ public partial class WorkbenchViewModel : ObservableObject
     public string StudentState => Students.Count == 1 ? "1 student" : $"{Students.Count} students";
     public string CatalogState => Equipment.Count == 1 ? "1 item" : $"{Equipment.Count} items";
     public string LoanState => Loans.Count == 1 ? "1 borrowing" : $"{Loans.Count} borrowings";
-    public bool ShowEmptyStudents => IsIdle && Students.Count == 0;
-    public bool ShowEmptyCatalog => IsIdle && Equipment.Count == 0;
-    public bool ShowEmptyLoans => IsIdle && Loans.Count == 0;
-    public string StudentHistoryState => StudentHistory.Count == 0 ? "Select a student and open their borrowing history." : $"{StudentHistory.Count} records";
-    public string EquipmentHistoryState => EquipmentHistory.Count == 0 ? "Select an item and open its borrowing history." : $"{EquipmentHistory.Count} records";
+    public bool ShowEmptyStudents => IsIdle && studentsLoaded && Students.Count == 0;
+    public bool ShowEmptyCatalog => IsIdle && equipmentLoaded && Equipment.Count == 0;
+    public bool ShowEmptyLoans => IsIdle && loansLoaded && Loans.Count == 0;
+    public string StudentHistoryState => HistoryState(studentHistoryLoaded, StudentHistory.Count, "Select a student and open their borrowing history.");
+    public string EquipmentHistoryState => HistoryState(equipmentHistoryLoaded, EquipmentHistory.Count, "Select an item and open its borrowing history.");
     public string StudentFormTitle => SelectedStudent is null ? "Register student" : "Edit student";
     public string EquipmentFormTitle => SelectedEquipment is null ? "Register equipment" : "Edit equipment";
     public bool HasStudent => SelectedStudent is not null;
@@ -52,7 +52,7 @@ public partial class WorkbenchViewModel : ObservableObject
         : $"{CheckedItemCount} checked · Select 2–3 items for a batch.";
     [ObservableProperty] private bool isBusy;
     [ObservableProperty] private bool needsReview;
-    [ObservableProperty] private string statusMessage = "Refresh to connect to PostgreSQL.";
+    [ObservableProperty] private string statusMessage = "Refresh to connect to the borrowing API.";
     [ObservableProperty] private string studentSearch = "";
     [ObservableProperty] private string equipmentSearch = "";
     [ObservableProperty] private bool availableOnly;
@@ -66,11 +66,12 @@ public partial class WorkbenchViewModel : ObservableObject
     [ObservableProperty] private string equipmentIdentifier = "";
     [ObservableProperty] private string equipmentName = "";
     [ObservableProperty] private string equipmentDescription = "";
-    [ObservableProperty] private DateTime? dueDate = DateTime.Today.AddDays(7);
+    [ObservableProperty] private DateTime? dueDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+        TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila")).Date.AddDays(7);
     [ObservableProperty] private string search = "";
     [ObservableProperty] private LoanFilter filter = LoanFilter.All;
     [ObservableProperty] private LoanSort sort = LoanSort.Checkout;
-    [ObservableProperty] private bool descending = true;
+    [ObservableProperty] private bool descending;
     public ObservableCollection<Student> Students { get; } = new();
     public ObservableCollection<Student> CheckoutStudents { get; } = new();
     public ObservableCollection<EquipmentRow> Equipment { get; } = new();
@@ -119,6 +120,7 @@ public partial class WorkbenchViewModel : ObservableObject
     partial void OnSelectedLoanChanged(LoanDetails? value) => OnPropertyChanged(nameof(CanReturn));
     partial void OnSelectedStudentChanged(Student? value)
     {
+        studentHistoryLoaded = false;
         StudentHistory.Clear();
         StudentNumber = value?.StudentNumber ?? ""; StudentName = value?.Name ?? ""; StudentContact = value?.Contact ?? "";
         OnPropertyChanged(nameof(StudentFormTitle));
@@ -127,6 +129,7 @@ public partial class WorkbenchViewModel : ObservableObject
     }
     partial void OnSelectedEquipmentChanged(EquipmentRow? value)
     {
+        equipmentHistoryLoaded = false;
         EquipmentHistory.Clear();
         EquipmentIdentifier = value?.Item.Identifier ?? ""; EquipmentName = value?.Item.Name ?? ""; EquipmentDescription = value?.Item.Description ?? "";
         OnPropertyChanged(nameof(EquipmentFormTitle));
@@ -139,7 +142,8 @@ public partial class WorkbenchViewModel : ObservableObject
         IsBusy = true; StatusMessage = "Working…";
         try { await action(); }
         catch (RecordMissingException ex) { StatusMessage = ex.Message; }
-        catch (Exception) { StatusMessage = "Database request failed. Check PostgreSQL and configuration, then refresh to retry."; }
+        catch (ApiClientException ex) { StatusMessage = ex.Message; }
+        catch (Exception) { StatusMessage = "Could not refresh records. Check the API configuration and retry."; }
         finally { IsBusy = false; }
     }
     [RelayCommand] private Task RefreshAsync() => RunAsync(async () => {
@@ -150,26 +154,52 @@ public partial class WorkbenchViewModel : ObservableObject
     });
     private async Task ReloadAsync()
     {
-        var students = await service.StudentsAsync();
-        var equipment = await service.EquipmentAsync(AvailableOnly);
-        var loans = await service.LoansAsync(new(Search, Filter, Sort, Descending));
-        var selectedStudentId = SelectedStudent?.Id; var selectedItemId = SelectedEquipment?.Item.Id;
+        var selectedStudentId = SelectedStudent?.Id;
+        var selectedItemId = SelectedEquipment?.Item.Id;
+        var reloadStudentHistory = studentHistoryLoaded;
+        var reloadEquipmentHistory = equipmentHistoryLoaded;
+        var studentsTask = service.StudentsAsync();
+        var studentResultsTask = string.IsNullOrWhiteSpace(StudentSearch) ? studentsTask : service.SearchStudentsAsync(StudentSearch);
+        var equipmentTask = service.EquipmentAsync(AvailableOnly);
+        var loansTask = service.LoansAsync(new(Search, Filter, Sort, Descending));
+        await Task.WhenAll(studentsTask, studentResultsTask, equipmentTask, loansTask);
+        var students = await studentsTask;
+        var equipment = await equipmentTask;
+        var loans = await loansTask;
         var checkedIds = Equipment.Where(e => e.IsChecked).Select(e => e.Item.Id).ToHashSet();
         var selectedLoanId = SelectedLoan?.Id;
         var checkoutId = CheckoutStudent?.Id;
         SelectedStudent = null; SelectedEquipment = null; SelectedLoan = null; CheckoutStudent = null;
         Replace(CheckoutStudents, students);
-        Replace(Students, students.Where(s => Matches(StudentSearch, s.Name, s.StudentNumber)));
+        Replace(Students, await studentResultsTask);
         ReplaceEquipment(equipment.Where(e => Matches(EquipmentSearch, e.Name, e.Identifier))
             .Select(e => new EquipmentRow(e) { IsChecked = e.IsAvailable && checkedIds.Contains(e.Id) }));
         Replace(Loans, loans);
+        studentsLoaded = equipmentLoaded = loansLoaded = true;
         SelectedStudent = Students.FirstOrDefault(s => s.Id == selectedStudentId);
         SelectedEquipment = Equipment.FirstOrDefault(e => e.Item.Id == selectedItemId);
         CheckoutStudent = CheckoutStudents.FirstOrDefault(s => s.Id == checkoutId);
         SelectedLoan = Loans.FirstOrDefault(loan => loan.Id == selectedLoanId);
+        if (reloadStudentHistory && SelectedStudent is { } student)
+        {
+            Replace(StudentHistory, await service.LoansAsync(new(StudentId: student.Id)));
+            studentHistoryLoaded = true;
+            OnPropertyChanged(nameof(StudentHistoryState));
+        }
+        if (reloadEquipmentHistory && SelectedEquipment is { } item)
+        {
+            Replace(EquipmentHistory, await service.LoansAsync(new(EquipmentId: item.Item.Id)));
+            equipmentHistoryLoaded = true;
+            OnPropertyChanged(nameof(EquipmentHistoryState));
+        }
         recoveryRefreshed = true;
     }
     private bool recoveryRefreshed;
+    private bool studentsLoaded;
+    private bool equipmentLoaded;
+    private bool loansLoaded;
+    private bool studentHistoryLoaded;
+    private bool equipmentHistoryLoaded;
     [RelayCommand] private void RecordsReviewed()
     {
         if (!NeedsReview) { StatusMessage = "No unknown operation is pending."; return; }
@@ -179,8 +209,9 @@ public partial class WorkbenchViewModel : ObservableObject
     [RelayCommand] private void NewStudent() { SelectedStudent = null; StudentNumber = ""; StudentName = ""; StudentContact = ""; StudentHistory.Clear(); }
     [RelayCommand] private void NewEquipment() { SelectedEquipment = null; EquipmentIdentifier = ""; EquipmentName = ""; EquipmentDescription = ""; EquipmentHistory.Clear(); }
     [RelayCommand] private Task FindStudentsAsync() => RunAsync(async () => {
-        var items = await service.StudentsAsync(); SelectedStudent = null;
-        Replace(Students, items.Where(s => Matches(StudentSearch, s.Name, s.StudentNumber)));
+        var items = await service.SearchStudentsAsync(StudentSearch); SelectedStudent = null;
+        Replace(Students, items);
+        studentsLoaded = true;
         StatusMessage = Students.Count == 0 ? "No students match." : $"{Students.Count} student(s).";
     });
     [RelayCommand] private Task FindEquipmentAsync() => RunAsync(async () => {
@@ -188,16 +219,27 @@ public partial class WorkbenchViewModel : ObservableObject
         var checkedIds = Equipment.Where(e => e.IsChecked).Select(e => e.Item.Id).ToHashSet();
         ReplaceEquipment(items.Where(e => Matches(EquipmentSearch, e.Name, e.Identifier))
             .Select(e => new EquipmentRow(e) { IsChecked = e.IsAvailable && checkedIds.Contains(e.Id) }));
+        equipmentLoaded = true;
         StatusMessage = Equipment.Count == 0 ? "No equipment matches." : $"{Equipment.Count} equipment item(s).";
     });
-    [RelayCommand] private Task SaveStudentAsync() => WriteAsync(() => service.SaveStudentAsync(
-        new(SelectedStudent?.Id ?? 0, StudentNumber, StudentName, StudentContact, SelectedStudent?.Version ?? 0)), "student");
-    [RelayCommand] private Task SaveEquipmentAsync() => WriteAsync(() => service.SaveEquipmentAsync(
-        new(SelectedEquipment?.Item.Id ?? 0, EquipmentIdentifier, EquipmentName, EquipmentDescription, SelectedEquipment?.Item.Version ?? 0)), "equipment");
+    [RelayCommand] private Task SaveStudentAsync() => WriteAsync(() =>
+    {
+        var selected = SelectedStudent;
+        return service.SaveStudentAsync(new(selected?.Id ?? 0, StudentNumber, StudentName, StudentContact,
+            selected?.Version ?? 0, selected is null ? null : HttpLabClient.Revision(selected)));
+    }, "student");
+
+    [RelayCommand] private Task SaveEquipmentAsync() => WriteAsync(() =>
+    {
+        var selected = SelectedEquipment?.Item;
+        return service.SaveEquipmentAsync(new(selected?.Id ?? 0, EquipmentIdentifier, EquipmentName, EquipmentDescription,
+            selected?.Version ?? 0, selected is null ? null : HttpLabClient.Revision(selected)));
+    }, "equipment");
     [RelayCommand] private Task PermitAsync() => SetEligibilityAsync(true);
     [RelayCommand] private Task RestrictAsync() => SetEligibilityAsync(false);
     private Task SetEligibilityAsync(bool allowed) => SelectedStudent is null ? Feedback("Select a student first.") :
-        WriteAsync(() => service.EligibilityAsync(SelectedStudent.Id, SelectedStudent.Version, allowed));
+        WriteAsync(() => service.EligibilityAsync(SelectedStudent.Id, SelectedStudent.Version, allowed,
+            revision: HttpLabClient.Revision(SelectedStudent)));
     [RelayCommand] private Task BorrowOneAsync() => SelectedEquipment is null ? Feedback("Select an equipment row first.") :
         CheckoutAsync(new[] { SelectedEquipment.Item.Id }, false);
     [RelayCommand] private Task CheckoutMultipleAsync() => CheckoutAsync(Equipment.Where(e => e.IsChecked).Select(e => e.Item.Id).ToArray(), true);
@@ -211,43 +253,58 @@ public partial class WorkbenchViewModel : ObservableObject
         return RunAsync(async () => {
             var result = await action();
             if (result.OutcomeUnknown) { NeedsReview = true; recoveryRefreshed = false; }
-            if (!result.OutcomeUnknown && (result.IsSuccess || savedKind is null))
+            if (!result.OutcomeUnknown && (result.IsSuccess || result.Failure == WriteFailure.Missing ||
+                (savedKind is null && result.Failure == WriteFailure.Conflict)))
             {
                 if (result.IsSuccess && savedKind == "student") StudentSearch = "";
                 if (result.IsSuccess && savedKind == "equipment") { EquipmentSearch = ""; AvailableOnly = false; }
                 try { await ReloadAsync(); }
-                catch { StatusMessage = result.Message + " Refresh failed. Check the connection and reload."; return; }
-                if (result.IsSuccess && savedKind == "student") SelectedStudent = Students.FirstOrDefault(s => s.Id == result.RecordId);
-                if (result.IsSuccess && savedKind == "equipment") SelectedEquipment = Equipment.FirstOrDefault(e => e.Item.Id == result.RecordId);
+                catch (ApiClientException ex) { StatusMessage = result.Message + " Refresh failed. " + ex.Message; return; }
+                catch { StatusMessage = result.Message + " Refresh failed. Check the API and reload."; return; }
+                if (result.IsSuccess && savedKind == "student" && SelectedStudent?.Id != result.RecordId)
+                    SelectedStudent = Students.FirstOrDefault(s => s.Id == result.RecordId);
+                if (result.IsSuccess && savedKind == "equipment" && SelectedEquipment?.Item.Id != result.RecordId)
+                    SelectedEquipment = Equipment.FirstOrDefault(e => e.Item.Id == result.RecordId);
             }
             StatusMessage = result.Message;
         });
     }
     [RelayCommand] private Task SearchLoansAsync() => RunAsync(async () => {
-        Loans.Clear(); SelectedLoan = null;
-        Replace(Loans, await service.LoansAsync(new(Search, Filter, Sort, Descending)));
+        var records = await service.LoansAsync(new(Search, Filter, Sort, Descending));
+        SelectedLoan = null;
+        Replace(Loans, records);
+        loansLoaded = true;
         StatusMessage = Loans.Count == 0 ? "No borrowing records match." : $"{Loans.Count} borrowing record(s).";
     });
     [RelayCommand] private Task ActiveLoansAsync() { Search = ""; Filter = LoanFilter.Active; return SearchLoansAsync(); }
-    [RelayCommand] private Task ClearCriteriaAsync() { Search = ""; Filter = LoanFilter.All; Sort = LoanSort.Checkout; Descending = true; return SearchLoansAsync(); }
+    [RelayCommand] private Task ClearCriteriaAsync() { Search = ""; Filter = LoanFilter.All; Sort = LoanSort.Checkout; Descending = false; return SearchLoansAsync(); }
     [RelayCommand] private Task StudentHistoryAsync() => RunAsync(async () => {
-        StudentHistory.Clear();
         if (SelectedStudent is null) { StatusMessage = "Select a student first."; return; }
         var id = SelectedStudent.Id;
         var records = await service.LoansAsync(new(StudentId: id));
         if (SelectedStudent?.Id != id) { StatusMessage = "Selection changed. Load the selected student's history."; return; }
         Replace(StudentHistory, records);
+        studentHistoryLoaded = true;
+        OnPropertyChanged(nameof(StudentHistoryState));
         StatusMessage = StudentHistory.Count == 0 ? "This student has no borrowing history." : $"{StudentHistory.Count} student history record(s).";
     });
     [RelayCommand] private Task EquipmentHistoryAsync() => RunAsync(async () => {
-        EquipmentHistory.Clear();
         if (SelectedEquipment is null) { StatusMessage = "Select equipment first."; return; }
         var id = SelectedEquipment.Item.Id;
         var records = await service.LoansAsync(new(EquipmentId: id));
         if (SelectedEquipment?.Item.Id != id) { StatusMessage = "Selection changed. Load the selected equipment's history."; return; }
         Replace(EquipmentHistory, records);
+        equipmentHistoryLoaded = true;
+        OnPropertyChanged(nameof(EquipmentHistoryState));
         StatusMessage = EquipmentHistory.Count == 0 ? "This equipment has no borrowing history." : $"{EquipmentHistory.Count} equipment history record(s).";
     });
+    private static string HistoryState(bool loaded, int count, string prompt) => !loaded ? prompt : count switch
+    {
+        0 => "No borrowing history.",
+        1 => "1 record",
+        _ => $"{count} records"
+    };
+
     private Task Feedback(string message) { StatusMessage = message; return Task.CompletedTask; }
     private void ReplaceEquipment(System.Collections.Generic.IEnumerable<EquipmentRow> source)
     {

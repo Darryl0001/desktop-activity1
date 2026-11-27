@@ -1,12 +1,11 @@
+using System;
+using System.Net.Http;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using EquipmentBorrowing.Application;
-using EquipmentBorrowing.Application.Services;
+using EquipmentBorrowing.Desktop.Services;
 using EquipmentBorrowing.Desktop.ViewModels;
-using EquipmentBorrowing.Infrastructure;
-using EquipmentBorrowing.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EquipmentBorrowing.Desktop;
@@ -16,10 +15,17 @@ public partial class App : Avalonia.Application
     public override void OnFrameworkInitializationCompleted()
     {
         var services = new ServiceCollection();
-        services.AddDbContextFactory<EquipmentBorrowingDbContext>(o => o.UseNpgsql(DatabaseConfiguration.ConnectionString));
-        services.AddSingleton<ILabRepository, PostgresLabRepository>();
-        services.AddSingleton<ICalendar, ManilaCalendar>();
-        services.AddSingleton<LabService>();
+        services.AddSingleton(_ =>
+        {
+            var address = Environment.GetEnvironmentVariable("LAB5_API_BASE_URL") ?? "http://127.0.0.1:5185";
+            return new HttpClient
+            {
+                BaseAddress = Uri.TryCreate(address.TrimEnd('/') + "/", UriKind.Absolute, out var uri)
+                    && uri.Scheme is "http" or "https" ? uri : null,
+                Timeout = TimeSpan.FromSeconds(20)
+            };
+        });
+        services.AddSingleton<ILabOperations, HttpLabClient>();
         services.AddTransient<WorkbenchViewModel>();
         var provider = services.BuildServiceProvider();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
