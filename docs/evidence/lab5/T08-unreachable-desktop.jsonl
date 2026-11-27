@@ -1,0 +1,4 @@
+{"method":"GET","path":"/api/v1/borrowings?search=\u0026status=All\u0026sort=borrowedDate\u0026direction=asc","transport":"ConnectionError"}
+{"method":"GET","path":"/api/v1/students?search=","transport":"ConnectionError"}
+{"method":"GET","path":"/api/v1/equipment","transport":"ConnectionError"}
+{"expected":"unreachable","uiStatus":"Could not reach the API. No HTTP response was received. Check that the API is running and refresh."}
